@@ -1,5 +1,21 @@
-import '@/styles/globals.css'
+import "@/styles/globals.css";
+import HomeProvider from "@/components/Context";
+import { QueryClient, QueryClientProvider } from "react-query";
+import { ReactQueryDevtools } from "react-query/devtools";
 
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />
-}
+const queryClient = new QueryClient();
+
+const App = ({ Component, pageProps }) => {
+  return (
+    <>
+      <HomeProvider>
+        <QueryClientProvider client={queryClient}>
+          <Component {...pageProps} />
+          <ReactQueryDevtools />
+        </QueryClientProvider>
+      </HomeProvider>
+    </>
+  );
+};
+
+export default App;
