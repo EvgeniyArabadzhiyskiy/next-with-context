@@ -26,7 +26,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className={styles.center}>
+        {/* <div className={styles.center}>
           <Image
             className={styles.logo}
             src="/next.svg"
@@ -44,10 +44,10 @@ export default function Home() {
               priority
             />
           </div>
-        </div>
+        </div> */}
 
         <div className={styles.grid}>
-          <a
+          {/* <a
             href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
             className={styles.card}
             target="_blank"
@@ -59,9 +59,9 @@ export default function Home() {
             <p className={inter.className}>
               Find in-depth information about Next.js features and&nbsp;API.
             </p>
-          </a>
+          </a> */}
 
-          <a
+          {/* <a
             href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
             className={styles.card}
             target="_blank"
@@ -73,9 +73,9 @@ export default function Home() {
             <p className={inter.className}>
               Learn about Next.js in an interactive course with&nbsp;quizzes!
             </p>
-          </a>
+          </a> */}
 
-          <a
+          {/* <a
             href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
             className={styles.card}
             target="_blank"
@@ -87,9 +87,9 @@ export default function Home() {
             <p className={inter.className}>
               Discover and deploy boilerplate example Next.js&nbsp;projects.
             </p>
-          </a>
+          </a> */}
 
-          <a
+          {/* <a
             href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template&utm_campaign=create-next-app"
             className={styles.card}
             target="_blank"
@@ -102,7 +102,7 @@ export default function Home() {
               Instantly deploy your Next.js site to a shareable URL
               with&nbsp;Vercel.
             </p>
-          </a>
+          </a> */}
         </div>
       </main>
     </>
