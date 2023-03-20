@@ -3,31 +3,29 @@ import HomeProvider, { HomeContext } from "@/components/Context";
 import { fetchPokemon } from "@/helpers/fetchPokemon";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
 import Link from "next/link";
-import { useEffect, useContext } from "react";
+import { useEffect, useContext, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
+import useSWR from "swr";
 
 const HomePage = () => {
-  const { count, setCount, isShow, setIsShow } = useContext(HomeContext);
+  const [ddd, setDdd] = useState([]);
+  console.log("HomePage  ddd:", ddd);
 
-  // const { isLoading, data } = useQuery("pokemon", () =>
-  //   fetchPokemon("bulbasaur")
-  // );
-  const { isLoading, data } = useQuery({ queryKey: ['pokemon'], queryFn: () => fetchPokemon("bulbasaur") });
-  console.log("HomePage  data:", data);
+  const { isShow, setIsShow } = useContext(HomeContext);
 
-  // const { isLoading, data } = useQuery("transactions", () =>
-  // getAllTransactions()
-  // );
-  // console.log("HomePage  data:", data);
+  const { data, error } = useSWR("pokeapi", fetcher);
 
-  // const incrementCount = () => setCount((p) => p + 1);
-  // const decrementCount = () => setCount((p) => p - 1);
+  useEffect(() => {
+    if (!data) {
+      return;
+    }
+
+    setDdd((p) => [...p, data]);
+  }, [data]);
 
   const toggleVisible = () => setIsShow((p) => !p);
 
-  // if (isLoading) {
-  //   return <h1>Loading...</h1>;
-  // }
+  const hount = () => console.log("HELLO");
 
   return (
     <>
@@ -41,27 +39,17 @@ const HomePage = () => {
         {isShow ? "Скрыть" : "Показать"}
       </button>
 
-      {/* <h2>{data.name}</h2> */}
-
-      {/* <ul>
-        {data.results.map((item) => {
-          return <li key={item.name}>{item.name}</li>;
-        })}
-      </ul> */}
-
-      {/* <h2>{count}</h2>
-      <button type="button" onClick={incrementCount}>Добавить</button>
-      <button type="button" onClick={decrementCount}>Отнять</button> */}
+      <button type="button" onClick={hount}>
+        CLICK
+      </button>
     </>
   );
 };
 
+const fetcher = async () => {
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon/bulbasaur");
+  const data = await response.json();
+  return data.name;
+};
+
 export default HomePage;
-
-// const WrapperContext = () => (
-//   <HomeProvider>
-//     <HomePage />
-//   </HomeProvider>
-// );
-
-// export default WrapperContext;
