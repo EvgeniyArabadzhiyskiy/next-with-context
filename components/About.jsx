@@ -1,8 +1,12 @@
-import { useContext, useEffect } from "react";
+import { fetchPokemon } from "@/helpers/fetchPokemon";
+import { useQuery } from "@tanstack/react-query";
+import { useContext, useEffect, useState } from "react";
 import HomeProvider, { HomeContext } from "./Context";
+import useSWR from "swr";
 
 const About = () => {
   const { count, setCount } = useContext(HomeContext);
+
 
   const incrementCount = () => setCount((p) => p + 1);
   const decrementCount = () => setCount((p) => p - 1);
@@ -22,6 +26,12 @@ const About = () => {
       </button>
     </>
   );
+};
+
+const fetcher = async () => {
+  const response = await fetch("https://pokeapi.co/api/v2/pokemon/bulbasaur");
+  const data = await response.json();
+  return data;
 };
 
 export default About;
