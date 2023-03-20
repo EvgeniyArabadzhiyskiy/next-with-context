@@ -1,4 +1,6 @@
-import { createContext, useState } from "react";
+import { fetchPokemon } from "@/helpers/fetchPokemon";
+import { useQuery } from "@tanstack/react-query";
+import { createContext, useEffect, useState } from "react";
 
 export const HomeContext = createContext();
 
