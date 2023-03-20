@@ -11,15 +11,18 @@ const App = ({ Component, pageProps }) => {
   return (
     <>
       <HomeProvider>
+
         <QueryClientProvider client={queryClient}>
           <Hydrate state={pageProps.dehydratedState}>
             <Component {...pageProps} />
           </Hydrate>
-          {/* <ReactQueryDevtools /> */}
         </QueryClientProvider>
+        
       </HomeProvider>
     </>
   );
 };
 
 export default App;
+
+//<ReactQueryDevtools />
