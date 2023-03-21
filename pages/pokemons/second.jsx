@@ -1,28 +1,28 @@
 import  { HomeContext } from "@/components/Context";
 import Link from "next/link";
-import { useContext } from "react";
+// import { useContext } from "react";
 
 const SecondPage = () => {
-  const { count, setCount } = useContext(HomeContext);
+  // const { count, setCount } = useContext(HomeContext);
 
-  const incrementCount = () => setCount((p) => p + 1);
-  const decrementCount = () => setCount((p) => p - 1);
+  // const incrementCount = () => setCount((p) => p + 1);
+  // const decrementCount = () => setCount((p) => p - 1);
 
   return (
     <>
       <h1>Home Page</h1>
-      <h2>{count}</h2>
+      {/* <h2>{count}</h2> */}
 
       <Link href="/">HOME</Link>
       <Link href="/pokemons">POKEMONS</Link>
 
-      <button type="button" onClick={incrementCount}>
+      {/* <button type="button" onClick={incrementCount}>
         Добавить
       </button>
 
       <button type="button" onClick={decrementCount}>
         Отнять
-      </button>
+      </button> */}
     </>
   );
 };
