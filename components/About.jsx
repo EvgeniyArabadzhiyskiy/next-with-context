@@ -5,7 +5,8 @@ import HomeProvider, { HomeContext } from "./Context";
 import useSWR from "swr";
 
 const About = () => {
-  const { count, setCount } = useContext(HomeContext);
+  const [count, setCount] = useState(0);
+  // const { count, setCount } = useContext(HomeContext);
 
 
   const incrementCount = () => setCount((p) => p + 1);
