@@ -1,34 +1,50 @@
 import { fetchPokemon } from "@/helpers/fetchPokemon";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
 import { useQuery } from "@tanstack/react-query";
-import { createContext, useEffect, useState } from "react";
+import { createContext, useEffect, useRef, useState } from "react";
 
 export const HomeContext = createContext();
 
-const HomeProvider = ({ children }) => {
+const ContextProvider = ({ children }) => {
   const [count, setCount] = useState(0);
   const [isShow, setIsShow] = useState(false);
 
-
-  const [ddd, setDdd] = useState([]);
-  const [searchValue, setSearchValue] = useState("");
-  const [pageNum, setPageNum] = useState("");
+  const [pageNum, setPageNum] = useState(1);
+  const [pokemon, setPokemon] = useState([]);
+  const firstRender = useRef(true);
 
   const { isLoading, data } = useQuery({
-    queryKey: ["pokemon", pageNum],
+    queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
-    enabled: pageNum.length > 0,
+    refetchOnWindowFocus: false,
   });
 
+
   useEffect(() => {
-    if (data) setDdd((prev) => [...prev, ...data]);
+    if (firstRender.current) {
+      firstRender.current = false;
+      return;
+    }
+
+    if (data) {
+      setPokemon((prev) => [...prev, ...data]);
+    }
   }, [data]);
 
   return (
-    <HomeContext.Provider value={{ddd, setPageNum, searchValue, setSearchValue, count, setCount, isShow, setIsShow }}>
+    <HomeContext.Provider
+      value={{
+        pokemon,
+        setPageNum,
+        count,
+        setCount,
+        isShow,
+        setIsShow,
+      }}
+    >
       {children}
     </HomeContext.Provider>
   );
 };
 
-export default HomeProvider;
+export default ContextProvider;
