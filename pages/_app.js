@@ -1,6 +1,6 @@
 import "@/styles/globals.css";
 import { useState } from "react";
-import HomeProvider from "@/components/Context";
+import ContextProvider from "@/components/Context";
 // import { ReactQueryDevtools } from "react-query/devtools";
 // import { QueryClient, QueryClientProvider } from "react-query";
 
@@ -17,11 +17,11 @@ const App = ({ Component, pageProps }) => {
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        <HomeProvider>
+        {/* <ContextProvider> */}
           <Hydrate state={pageProps.dehydratedState}>
             <Component {...pageProps} />
           </Hydrate>
-        </HomeProvider>
+        {/* </ContextProvider> */}
       </QueryClientProvider>
     </>
   );
