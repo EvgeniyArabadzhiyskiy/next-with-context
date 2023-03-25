@@ -1,31 +1,55 @@
-import { getAllTransactions } from "@/helpers/getAllTransactions";
+import axios from "axios";
 import Link from "next/link";
+import { useRef, useCallback, useEffect } from "react";
+import { getAllTransactions } from "@/helpers/getAllTransactions";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-// const getPokemonsList = async ({
-//   pageParam = "https://pokeapi.co/api/v2/pokemon?offset=0&limit=10",
-// }) => {
-//   const { data: { results, next } = {} } = await axios(pageParam);
-//   return { response: results, nextPage: next };
-// };
+const getPokemonsList = async (
+  page = "https://pokeapi.co/api/v2/pokemon?offset=0&limit=10"
+) => {
+  const { data: { results, next } = {} } = await axios(page);
+  return { response: results, nextPage: next };
+};
 
 const InfinitePage = () => {
-  //   const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  //     useInfiniteQuery({
-  //       queryKey: ["pokemonList"],
-  //       queryFn: getPokemonsList,
-  //       getNextPageParam: (lastPage) => lastPage.nextPage,
-  //     });
+  // const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+  //   useInfiniteQuery({
+  //     queryKey: ["pokemonList"],
+  //     queryFn: ({ pageParam }) => getPokemonsList(pageParam),
+  //     getNextPageParam: (lastPage) => lastPage.nextPage,
+  //   });
+
+  
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
-      queryKey: ["pokemonList"],
+      queryKey: ["transactionsList"],
       queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
       refetchOnWindowFocus: false,
-      getNextPageParam: (lastPage, allPagas) => allPagas.length + 1,
+      getNextPageParam: (lastPage, allPagas) => {
+        const nextPage = allPagas.length + 1;
+        return lastPage.length !== 0 ? nextPage : undefined;
+      },
     });
 
-  const [transactions] = data?.pages || [];
+
+  const observerElem = useRef(null);  
+ 
+  const handleObserver = useCallback((entries) => {
+    if(entries[0].isIntersecting && hasNextPage) {
+      fetchNextPage()
+    }
+  }, [fetchNextPage, hasNextPage])
+
+  useEffect(() => {
+    const element = observerElem.current
+    const option = { threshold: 0 }
+
+    const observer = new IntersectionObserver(handleObserver, option);
+    observer.observe(element)
+
+    return () => observer.unobserve(element)
+  }, [fetchNextPage, hasNextPage, handleObserver])
 
   return (
     <>
@@ -34,11 +58,25 @@ const InfinitePage = () => {
       <Link href="/">HOME</Link>
       <Link href="/pokemons/second">SECOND</Link>
 
-      {transactions.map((group) => {
-        return group.map((item) => {
-          return <li key={item._id}>{item.category}</li>;
-        });
-      })}
+      <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
+        {data?.pages.map((group) => {
+          return group.map((item) => {
+            return (
+              <li style={{ height: "30px", fontSize: "20px" }} key={item._id}>
+                {item.category}
+              </li>
+            );
+          });
+        })}
+
+        <div
+          className="loader"
+          ref={observerElem}
+          style={{ height: "50px", background: "tomato" }}
+        >
+          {isFetchingNextPage && hasNextPage ? "Loading..." : "No search left"}
+        </div>
+      </div>
 
       {/* {data?.pages.map((group) => {
         return group.response.map((pokemon) => {
@@ -46,7 +84,7 @@ const InfinitePage = () => {
         });
       })} */}
 
-      <button
+      {/* <button
         onClick={() => fetchNextPage()}
         disabled={!hasNextPage || isFetchingNextPage}
       >
@@ -55,7 +93,7 @@ const InfinitePage = () => {
           : hasNextPage
           ? "Load More"
           : "Nothing more to load"}
-      </button>
+      </button> */}
     </>
   );
 };
