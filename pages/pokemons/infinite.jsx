@@ -42,14 +42,14 @@ const InfinitePage = () => {
   }, [fetchNextPage, hasNextPage])
 
   useEffect(() => {
-    const element = observerElem.current
+    const target = observerElem.current
     const option = { threshold: 0 }
 
     const observer = new IntersectionObserver(handleObserver, option);
-    observer.observe(element)
+    observer.observe(target)
 
-    return () => observer.unobserve(element)
-  }, [fetchNextPage, hasNextPage, handleObserver])
+    return () => observer.unobserve(target)
+  }, [fetchNextPage, handleObserver])
 
   return (
     <>
@@ -69,13 +69,10 @@ const InfinitePage = () => {
           });
         })}
 
-        <div
-          className="loader"
-          ref={observerElem}
-          style={{ height: "50px", background: "tomato" }}
-        >
+        <div ref={observerElem} style={{ height: "50px", background: "tomato" }}>
           {isFetchingNextPage && hasNextPage ? "Loading..." : "No search left"}
         </div>
+        
       </div>
 
       {/* {data?.pages.map((group) => {
