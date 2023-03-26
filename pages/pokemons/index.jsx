@@ -12,10 +12,18 @@ import {
 } from "@tanstack/react-query";
 import useSWR from "swr";
 
+
+
+// export async function getStaticProps() {
+//   const posts = await fetchPokemon()
+//   console.log("getStaticProps  posts:", posts);
+//   return { props: { posts } }
+// }
+
 // export async function getStaticProps() {
 //   const queryClient = new QueryClient()
 
-//   await queryClient.prefetchQuery(['pokemon'], fetchPokemon)
+//   await queryClient.prefetchQuery(["transactions"], getAllTransactions)
 
 //   return {
 //     props: {
@@ -24,21 +32,16 @@ import useSWR from "swr";
 //   }
 // }
 
-// export async function getStaticProps() {
-//   const posts = await fetchPokemon()
-//   console.log("getStaticProps  posts:", posts);
-//   return { props: { posts } }
-// }
-
-const HomePage = ({ posts }) => {
+const HomePage = () => {
   // const [isShow, setIsShow] = useState(false);
+
   const [pageNum, setPageNum] = useState(1);
-  const [pokemon, setPokemon] = useState([]);
+  const [transactions, setTransactions] = useState([]);
   const firstRender = useRef(true);
 
   // const { pokemon, isShow, setIsShow, setPageNum } = useContext(HomeContext);
 
-  const queryClient = useQueryClient()
+  // const queryClient = useQueryClient()
   // console.log("HomePage  queryClient:", queryClient.setQueriesData);
 
   const { isLoading, data } = useQuery({
@@ -53,7 +56,7 @@ const HomePage = ({ posts }) => {
       return;
     }
 
-    if (data) setPokemon((prev) => [...prev, ...data]);
+    if (data) setTransactions((prev) => [...prev, ...data]);
   }, [data]);
 
   const onNextPage = (e) => {
@@ -95,7 +98,7 @@ const HomePage = ({ posts }) => {
       </ul> */}
 
       <ul>
-        {pokemon?.map((item) => {
+        {transactions?.map((item) => {
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
@@ -106,6 +109,10 @@ const HomePage = ({ posts }) => {
     </>
   );
 };
+
+
+
+
 
 export default HomePage;
 //============================================================
