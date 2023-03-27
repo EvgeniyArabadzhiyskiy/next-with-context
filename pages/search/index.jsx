@@ -19,7 +19,6 @@ export default function Pokemon() {
 
   return (
     <div className="container">
-      {/* <h1>{pokemon?.name}</h1> */}
       <PokemonCard
         name={pokemon?.name}
         image={pokemon?.sprites?.other?.["official-artwork"]?.front_default}
