@@ -142,12 +142,6 @@ export default HomePage;
 // }, []);
 
 //============================================================
-// (async () => {
-//   const data = await getAllTransactions(pageNum)
-//   setPokemon((prev) => [...prev, ...data]);
-// })()
-
-//============================================================
 {
   /* <form onSubmit={(e) => onNextPage(e)}>
   <input
