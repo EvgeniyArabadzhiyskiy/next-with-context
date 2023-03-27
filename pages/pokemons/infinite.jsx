@@ -12,14 +12,13 @@ const getPokemonsList = async (
 };
 
 const InfinitePage = () => {
+  
   // const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
   //   useInfiniteQuery({
   //     queryKey: ["pokemonList"],
   //     queryFn: ({ pageParam }) => getPokemonsList(pageParam),
   //     getNextPageParam: (lastPage) => lastPage.nextPage,
   //   });
-
-  
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
     useInfiniteQuery({
