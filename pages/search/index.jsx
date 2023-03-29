@@ -5,12 +5,27 @@ import { useRouter } from "next/router";
 import PokemonCard from "@/components/PokemonCard";
 
 const fetchPokemon = () =>
-  axios.get(`https://pokeapi.co/api/v2/pokemon/1/`).then(({ data }) => data);
+  axios.get(`https://pokeapi.co/api/v2/pokemon/1`).then(({ data }) => data);
+
+export const getStaticProps = async (context) => {
+  const queryClient = new QueryClient();
+
+  await queryClient.prefetchQuery(["getPokemon"], fetchPokemon);
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
+};
 
 export default function Pokemon() {
   // const { data: pokemon } = useQuery(["getPokemon"], fetchPokemon);
 
-  const { data: pokemon } = useQuery({queryKey: ["getPokemon"], queryFn: fetchPokemon});
+  const { data: pokemon } = useQuery({
+    queryKey: ["getPokemon"],
+    queryFn: fetchPokemon,
+  });
   console.log("Pokemon  pokemon:", pokemon?.name);
 
   // if (pokemon) {
@@ -29,15 +44,3 @@ export default function Pokemon() {
     </div>
   );
 }
-
-export const getStaticProps = async (context) => {
-  const queryClient = new QueryClient();
-
-  await queryClient.prefetchQuery(["getPokemon"], fetchPokemon);
-
-  return {
-    props: {
-      dehydratedState: dehydrate(queryClient),
-    },
-  };
-};
