@@ -12,41 +12,37 @@ import {
 } from "@tanstack/react-query";
 import useSWR from "swr";
 
-
-
 // export async function getStaticProps() {
-//   const posts = await fetchPokemon()
-//   console.log("getStaticProps  posts:", posts);
-//   return { props: { posts } }
-// }
+//   const queryClient = new QueryClient();
 
-// export async function getStaticProps() {
-//   const queryClient = new QueryClient()
-
-//   await queryClient.prefetchQuery(["transactions"], getAllTransactions)
+//   await queryClient.prefetchQuery(["transactions"], getAllTransactions);
 
 //   return {
 //     props: {
 //       dehydratedState: dehydrate(queryClient),
+//
 //     },
-//   }
+//   };
 // }
 
-const HomePage = () => {
+export async function getStaticProps() {
+  const initialData = await getAllTransactions();
+  return { props: { initialData } };
+}
+
+const HomePage = ({ initialData = [] }) => {
   // const [isShow, setIsShow] = useState(false);
-
-  const [pageNum, setPageNum] = useState(1);
-  const [transactions, setTransactions] = useState([]);
-  const firstRender = useRef(true);
-
   // const { pokemon, isShow, setIsShow, setPageNum } = useContext(HomeContext);
 
-  // const queryClient = useQueryClient()
-  // console.log("HomePage  queryClient:", queryClient.setQueriesData);
+  const [isSkip, setIsSkip] = useState(false);
+  const [pageNum, setPageNum] = useState(1);
+  const [transactions, setTransactions] = useState(initialData);
+  const firstRender = useRef(true);
 
   const { isLoading, data } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
+    enabled: isSkip,
     refetchOnWindowFocus: false,
   });
 
@@ -60,13 +56,8 @@ const HomePage = () => {
   }, [data]);
 
   const onNextPage = (e) => {
+    setIsSkip(true);
     setPageNum((p) => p + 1);
-    // queryClient.setQueryData({queryKey:'transactions'}, oldData => {
-    // console.log("onNextPage  oldData:", oldData);
-    // const updateData = [...oldData, ...data]
-
-    // return updateData
-    // })
   };
 
   // const toggleVisible = () => setIsShow((p) => !p);
@@ -109,10 +100,6 @@ const HomePage = () => {
     </>
   );
 };
-
-
-
-
 
 export default HomePage;
 //============================================================
