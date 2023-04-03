@@ -2,26 +2,47 @@ import "@/styles/globals.css";
 import { useState } from "react";
 import ContextProvider from "@/components/Context";
 // import { ReactQueryDevtools } from "react-query/devtools";
-// import { QueryClient, QueryClientProvider } from "react-query";
 
 import {
   QueryClient,
   QueryClientProvider,
   Hydrate,
 } from "@tanstack/react-query";
+import PrivateRoute from "@/components/PrivateRoute";
 
-// const queryClient = new QueryClient()
+const userData = {
+  email: "user100@mail.com",
+  password: "a123456",
+};
 
 const App = ({ Component, pageProps }) => {
-  const [queryClient] = useState(() => new QueryClient());
+  const [queryClient] = useState(
+    () =>
+      new QueryClient({
+        defaultOptions: {
+          queries: {
+            refetchOnWindowFocus: false,
+            // staleTime: 0.1 * (60 * 1000),
+          },
+        },
+      })
+  );
+
+  // const cacheTransactions = queryClient.getQueryCache().find(["user", userData])
+  //   ?.state.data;
+  const cacheTransactions = queryClient.getQueryCache().findAll()
+    // ?.state.data;
+  // console.log("App  cacheTransactions:", cacheTransactions);
   return (
     <>
       <QueryClientProvider client={queryClient}>
-        {/* <ContextProvider> */}
-          <Hydrate state={pageProps.dehydratedState}>
-            <Component {...pageProps} />
-          </Hydrate>
-        {/* </ContextProvider> */}
+        <ContextProvider>
+          <PrivateRoute>
+            <Hydrate state={pageProps.dehydratedState}>
+              <Component {...pageProps} />
+            </Hydrate>
+          </PrivateRoute>
+        </ContextProvider>
       </QueryClientProvider>
     </>
   );
