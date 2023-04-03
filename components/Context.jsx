@@ -6,40 +6,54 @@ import { createContext, useEffect, useRef, useState } from "react";
 export const HomeContext = createContext();
 
 const ContextProvider = ({ children }) => {
-  const [count, setCount] = useState(0);
-  const [isShow, setIsShow] = useState(false);
+  // const [count, setCount] = useState(0);
+  // const [isShow, setIsShow] = useState(false);
 
   const [pageNum, setPageNum] = useState(1);
-  const [pokemon, setPokemon] = useState([]);
+  const [transactions, setTransactions] = useState([]);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
+
   const firstRender = useRef(true);
 
   const { isLoading, data } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
-    refetchOnWindowFocus: false,
+    // refetchOnWindowFocus: false,
+    // enabled: false,
+    onSuccess: (data) => {
+      setTransactions((prev) => [...prev, ...data]);
+    },
   });
+  console.log("ContextProvider  data:", data);
 
 
-  useEffect(() => {
-    if (firstRender.current) {
-      firstRender.current = false;
-      return;
-    }
+  // useEffect(() => {
+  //   if (firstRender.current) {
+  //     firstRender.current = false;
+  //     return;
+  //   }
 
-    if (data) {
-      setPokemon((prev) => [...prev, ...data]);
-    }
-  }, [data]);
+  //   if (data) {
+  //     setTransactions((prev) => [...prev, ...data]);
+  //   }
+  // }, [data]);
 
   return (
     <HomeContext.Provider
       value={{
-        pokemon,
+        pageNum,
         setPageNum,
-        count,
-        setCount,
-        isShow,
-        setIsShow,
+
+        transactions,
+        setTransactions,
+
+        isLoggedIn,
+        setIsLoggedIn,
+        // count,
+        // setCount,
+        // isShow,
+        // setIsShow,
       }}
     >
       {children}
