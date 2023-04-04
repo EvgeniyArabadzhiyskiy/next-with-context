@@ -28,6 +28,9 @@ const App = ({ Component, pageProps }) => {
       })
   );
 
+  const state = queryClient.getQueryState()
+  // console.log(state)
+
   // const cacheTransactions = queryClient.getQueryCache().find(["user", userData])
   //   ?.state.data;
   const cacheTransactions = queryClient.getQueryCache().findAll()
