@@ -43,30 +43,20 @@ const HomePage = ({ initialData = [] }) => {
   // console.log(state)
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
+  console.log("HomePage  queryClient.getQueryData:", queryClient.getQueriesData());
 
 
 
-  // const dataCacheTrans = queryClient
-  //   .getQueriesData(["transactions"])
-  //   .map(([key, data]) => data)
-  //   .filter((data) => data !== undefined)
-  //   .flat();
+  const dataCacheTrans = queryClient
+    .getQueriesData(["transactions"])
+    .map(([key, data]) => data)
+    .filter((data) => data !== undefined)
+    .flat();
 
   // console.log("HomePage  dataCacheTrans:", dataCacheTrans);
 
 
-  const eee = async () => {
-    // setPageNum((p) => p + 1);
-    // try {
-    //   const data = await queryClient.fetchQuery({
-    //     queryKey: ["transactions", pageNum],
-    //     queryFn: () => getAllTransactions(pageNum),
-    //   });
-    //   // console.log("eee  data:", data);
-    // } catch (error) {
-    //   console.log(error);
-    // }
-  };
+
 
   const { isLoading, data } = useQuery({
     queryKey: ["transactions", pageNum],
@@ -75,7 +65,7 @@ const HomePage = ({ initialData = [] }) => {
     // refetchOnWindowFocus: false,
 
     // keepPreviousData: true,
-    // cacheTime: 0.2 * (60 * 1000),
+    // cacheTime: 0.3 * (60 * 1000),
     // staleTime: 0.2 * (60 * 1000),
     staleTime: Infinity,
 
@@ -86,7 +76,32 @@ const HomePage = ({ initialData = [] }) => {
     // },
   });
 
+  //================================================================
+  // const fetchQuery = async () => {
+  //   setPageNum((p) => p + 1);
+   
+  //   const data = await queryClient.fetchQuery({
+  //     queryKey: ["transactions", pageNum],
+  //     queryFn: () => getAllTransactions(pageNum),
+  //   });
 
+  //   setTransactions((prev) => [...prev, ...data]);
+  // };
+
+  //================================================================
+  const fetchQuery = async () => {
+    // setPageNum((p) => p + 1);
+   
+    // const data = await queryClient.ensureQueryData({
+    //   queryKey: ["transactions", pageNum],
+    //   queryFn: () => getAllTransactions(pageNum),
+    // });
+    // console.log("fetchQuery  data:", data);
+
+    // setTransactions((prev) => [...prev, ...data]);
+  };
+
+  //================================================================
   // const firstRender = useRef(true);
   // useEffect(() => {
   //   if (firstRender.current) {
@@ -124,7 +139,11 @@ const HomePage = ({ initialData = [] }) => {
       <button type="button" onClick={onNextPage}>
         Next Page
       </button>{" "}
-      <button type="button" onClick={eee}>
+
+      <button type="button" onClick={() => setPageNum((p) => p - 1)}>
+        PREV Page
+      </button>{" "}
+      <button type="button" onClick={fetchQuery}>
         TEST
       </button>
 
