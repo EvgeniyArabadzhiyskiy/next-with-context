@@ -7,10 +7,20 @@ import { useEffect, useContext, useState, useRef } from "react";
 import {
   dehydrate,
   QueryClient,
+  useMutation,
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
 import useSWR from "swr";
+import { createTransaction } from "@/helpers/createTransaction";
+
+const transData = {
+  amount: 500,
+  category: "WODA",
+  typeOperation: "expense",
+  comment: "Fruits",
+  date: new Date().toString(),
+};
 
 // export async function getStaticProps() {
 //   const queryClient = new QueryClient();
@@ -34,31 +44,37 @@ const HomePage = ({ initialData = [] }) => {
   const queryClient = useQueryClient();
 
   const [isSkip, setIsSkip] = useState(false);
+  const [credentials, setCredentials] = useState(transData);
   // const [pageNum, setPageNum] = useState(1);
-   // const [transactions, setTransactions] = useState([]);
+  // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
-  const { transactions, setTransactions, isShow, setIsShow, pageNum, setPageNum } = useContext(HomeContext);
+  const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
 
-  // const state = queryClient.getQueryState()
-  // console.log(state)
-
-  // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
-  console.log("HomePage  queryClient.getQueryData:", queryClient.getQueriesData());
-
-
-
-  const dataCacheTrans = queryClient
+  let dataCacheTrans = queryClient
     .getQueriesData(["transactions"])
     .map(([key, data]) => data)
     .filter((data) => data !== undefined)
     .flat();
 
-  // console.log("HomePage  dataCacheTrans:", dataCacheTrans);
+  // console.log("dataCacheTrans:", dataCacheTrans);
 
+  // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
+  const mutation = useMutation({
+    mutationFn: createTransaction,
+    onSuccess: (data, variables) => {
+      // queryClient.setQueryData(['transactions',1], (old) => {
+      //   return [data.data, ...old]
+      // })
 
+      setPageNum(1);
+      queryClient.removeQueries({ queryKey: ["transactions"] });
+      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    },
+  });
 
+  console.log("HomePage", queryClient.getQueriesData());
 
-  const { isLoading, data } = useQuery({
+  const { isLoading } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
     // enabled: isSkip,
@@ -70,6 +86,7 @@ const HomePage = ({ initialData = [] }) => {
     staleTime: Infinity,
 
     // select: (data) => data.transactions,
+
     // onSuccess: (data) => {
     //   setTransactions((prev) => [...prev, ...data]);
     //   // setTransactions(data);
@@ -79,7 +96,7 @@ const HomePage = ({ initialData = [] }) => {
   //================================================================
   // const fetchQuery = async () => {
   //   setPageNum((p) => p + 1);
-   
+
   //   const data = await queryClient.fetchQuery({
   //     queryKey: ["transactions", pageNum],
   //     queryFn: () => getAllTransactions(pageNum),
@@ -90,14 +107,13 @@ const HomePage = ({ initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
+    // queryClient.removeQueries({ queryKey:['transactions'] })
     // setPageNum((p) => p + 1);
-   
     // const data = await queryClient.ensureQueryData({
     //   queryKey: ["transactions", pageNum],
     //   queryFn: () => getAllTransactions(pageNum),
     // });
     // console.log("fetchQuery  data:", data);
-
     // setTransactions((prev) => [...prev, ...data]);
   };
 
@@ -124,43 +140,44 @@ const HomePage = ({ initialData = [] }) => {
   //   return <h1>Loading...</h1>
   // }
 
+  const onCreate = async (e) => {
+    e.preventDefault();
+    mutation.mutate(credentials);
+  };
+
   return (
     <>
       <h1>Home Page</h1>
-
-      <Link href="/">HOME</Link>{" "}
-      <Link href="/transactions/second">SECOND</Link>
-
+      <Link href="/">HOME</Link> <Link href="/transactions/second">SECOND</Link>
       {/* {isShow && <About />}
       <button type="button" onClick={toggleVisible}>
         {isShow ? "Скрыть" : "Показать"}
       </button> */}
-
       <button type="button" onClick={onNextPage}>
         Next Page
       </button>{" "}
-
       <button type="button" onClick={() => setPageNum((p) => p - 1)}>
         PREV Page
       </button>{" "}
       <button type="button" onClick={fetchQuery}>
         TEST
       </button>
-
+      <form onSubmit={onCreate}>
+        <input type="number" name="amount" placeholder="Amount" />
+        <input type="text" name="category" placeholder="Category" />
+        <button type="submit">Login</button>
+      </form>
       {/* <h2>{data.name}</h2> */}
-
       {/* <ul>
         {data.results.map((item) => {
           return <li key={item.name}>{item.name}</li>;
         })}
       </ul> */}
-
       <ul>
         {dataCacheTrans?.map((item) => {
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
-
       {/* <button type="button" onClick={hount}>
         CLICK
       </button> */}
