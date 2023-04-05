@@ -1,10 +1,26 @@
 import { HomeContext } from "@/components/Context";
-import { useQueryClient } from "@tanstack/react-query";
+import { createTransaction } from "@/helpers/createTransaction";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
 import Link from "next/link";
+import { useState } from "react";
 // import { useContext } from "react";
+
+// const transData = {
+//   amount: 500,
+//   category: "Regular Income",
+//   typeOperation: "income",
+//   comment: "Fruits",
+//   date: new Date().toString(),
+// };
 
 const SecondPage = () => {
   const queryClient = useQueryClient();
+
+  // const [credentials, setCredentials] = useState(transData);
+  // const mutation = useMutation({ mutationFn: createTransaction });
+
+  // const cache = queryClient.getQueryCache().clear()
 
   // const cacheTransactions = queryClient  //// ЕСЛИ данные  собираются в один массив
   //   .getQueryCache()
@@ -12,8 +28,6 @@ const SecondPage = () => {
   //   .map((item) => item.state.data)
   //   .flat();
   // console.log("SecondPage  cacheTransactions:", cacheTransactions);
-  
-
 
   // const dataCacheTrans = queryClient    //ЕСЛИ данные не собираются в один массив
   // .getQueryCache()
@@ -25,6 +39,11 @@ const SecondPage = () => {
   // const incrementCount = () => setCount((p) => p + 1);
   // const decrementCount = () => setCount((p) => p - 1);
 
+  const onCreate = async (e) => {
+    e.preventDefault();
+    mutation.mutate(credentials);
+  };
+
   return (
     <>
       <h1>Home Page</h1>
@@ -32,6 +51,12 @@ const SecondPage = () => {
 
       <Link href="/">HOME</Link>
       <Link href="/transactions">Transactions</Link>
+
+      {/* <form onSubmit={onCreate}>
+        <input type="number" name="amount" placeholder="Amount" />
+        <input type="text" name="category" placeholder="Category" />
+        <button type="submit">Login</button>
+      </form> */}
 
       {/* <ul>
         {cacheTransactions?.map((item) => {
