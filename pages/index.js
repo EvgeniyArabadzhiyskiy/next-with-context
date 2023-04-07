@@ -17,12 +17,14 @@ export default function Home() {
       </Head>
       <main className={styles.main}>
         <div className={styles.description}>
+        <Link href="/login">LOGIN</Link>
           <p>
             Get started by editing&nbsp;
             <code className={styles.code}>pages/index.js</code>
           </p>
           <div>
-            <Link href="/pokemons">POKEMONS</Link>
+            <Link href="/transactions">Transactions</Link>
+            <Link href="/transactions/second">SECOND</Link>
           </div>
         </div>
 
