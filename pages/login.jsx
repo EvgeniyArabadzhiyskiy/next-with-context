@@ -1,4 +1,5 @@
 import { HomeContext } from "@/components/Context";
+import { getAllTransactions } from "@/helpers/getAllTransactions";
 import { getUser } from "@/helpers/getUser";
 import { refreshUser } from "@/helpers/refreshUser";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -41,6 +42,10 @@ const LoginPage = () => {
     enabled: !!authToken,
 
     staleTime: Infinity,
+    onSuccess: async () => {
+      // console.log('PREFETCH');
+      // await queryClient.prefetchQuery(["transactions"], () => getAllTransactions(1));
+    }
   });
 
   const onInputChange = (e) => {
