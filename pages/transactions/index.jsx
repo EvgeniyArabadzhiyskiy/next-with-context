@@ -57,6 +57,7 @@ const HomePage = ({ initialData = [] }) => {
     .flat();
 
   // console.log("dataCacheTrans:", dataCacheTrans);
+  console.log("HomePage", queryClient.getQueriesData());
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   const mutation = useMutation({
@@ -72,7 +73,7 @@ const HomePage = ({ initialData = [] }) => {
     },
   });
 
-  console.log("HomePage", queryClient.getQueriesData());
+  
 
   const { isLoading } = useQuery({
     queryKey: ["transactions", pageNum],
