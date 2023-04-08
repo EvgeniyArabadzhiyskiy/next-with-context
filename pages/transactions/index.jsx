@@ -13,6 +13,7 @@ import {
 } from "@tanstack/react-query";
 import useSWR from "swr";
 import { createTransaction } from "@/helpers/createTransaction";
+import axios from "axios";
 
 const transData = {
   amount: 500,
@@ -50,32 +51,56 @@ const HomePage = ({ initialData = [] }) => {
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
 
-  let dataCacheTrans = queryClient
+  const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
     .getQueriesData(["transactions"])
     .map(([key, data]) => data)
     .filter((data) => data !== undefined)
     .flat();
 
-  // console.log("dataCacheTrans:", dataCacheTrans);
-  console.log("HomePage", queryClient.getQueriesData());
+  console.log("dataCacheTrans:", dataCacheTrans);
+  // console.log("HomePage", queryClient.getQueriesData());
+
+
+  // const cacheTransactions = queryClient  
+  //   .getQueryCache()
+  //   .findAll(["transactions"])
+  //   .map((item) => item.state?.data)
+  //   .filter((data) => data !== undefined)
+  //   .flat();
+  // console.log("HomePage  cacheTransactions:", cacheTransactions);
+
+
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
+  // console.log("HomePage  dataCacheTrans:", dataCacheTrans);
+  
   const mutation = useMutation({
     mutationFn: createTransaction,
     onSuccess: (data, variables) => {
-      // queryClient.setQueryData(['transactions',1], (old) => {
-      //   return [data.data, ...old]
-      // })
 
-      setPageNum(1);
-      queryClient.removeQueries({ queryKey: ["transactions"] });
-      queryClient.invalidateQueries({ queryKey: ["transactions"] });
+      console.log("HomePage  data:", data);
+      queryClient.setQueryData(['transactions',1], (old) => {
+      // console.log("queryClient.setQueryData  old:",old);
+
+
+      //  old.splice(4, 1)
+      //  return old
+       
+
+        return [data, ...old]
+
+      })
+      
+
+      // setPageNum(1);
+      // queryClient.removeQueries({ queryKey: ["transactions"] });
+      // queryClient.invalidateQueries({ queryKey: ["transactions" ]});
     },
   });
 
-  
 
-  const { isLoading } = useQuery({
+
+  const { isLoading, data: todos } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
     // enabled: isSkip,
@@ -108,7 +133,18 @@ const HomePage = ({ initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
+
+    queryClient.setQueryData(['transactions',pageNum], (old) => {
+      // console.log("queryClient.setQueryData  old:",old);
+      old.splice(4, 1)
+      return old
+    })
+
+    // queryClient.invalidateQueries({ queryKey: ["transactions"] });
+    // await queryClient.refetchQueries({ queryKey: ["transactions"] })
+
     // queryClient.removeQueries({ queryKey:['transactions'] })
+
     // setPageNum((p) => p + 1);
     // const data = await queryClient.ensureQueryData({
     //   queryKey: ["transactions", pageNum],
@@ -116,6 +152,7 @@ const HomePage = ({ initialData = [] }) => {
     // });
     // console.log("fetchQuery  data:", data);
     // setTransactions((prev) => [...prev, ...data]);
+
   };
 
   //================================================================
@@ -131,6 +168,8 @@ const HomePage = ({ initialData = [] }) => {
   const onNextPage = (e) => {
     setIsSkip(true);
     setPageNum((p) => p + 1);
+
+   
   };
 
   // const toggleVisible = () => setIsShow((p) => !p);
@@ -157,7 +196,7 @@ const HomePage = ({ initialData = [] }) => {
       <button type="button" onClick={onNextPage}>
         Next Page
       </button>{" "}
-      <button type="button" onClick={() => setPageNum((p) => p - 1)}>
+      <button type="button" disabled={pageNum < 2} onClick={() => setPageNum((p) => p - 1)}>
         PREV Page
       </button>{" "}
       <button type="button" onClick={fetchQuery}>
@@ -176,6 +215,7 @@ const HomePage = ({ initialData = [] }) => {
       </ul> */}
       <ul>
         {dataCacheTrans?.map((item) => {
+          // return item?.state?.data?.map(i => <li key={i._id}>{i.category}</li>)
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
