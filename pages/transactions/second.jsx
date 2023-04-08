@@ -25,7 +25,8 @@ const SecondPage = () => {
   // const cacheTransactions = queryClient  //// ЕСЛИ данные  собираются в один массив
   //   .getQueryCache()
   //   .findAll(["transactions"])
-  //   .map((item) => item.state.data)
+  //   .map((item) => item.state?.data)
+  //   .filter((data) => data !== undefined)
   //   .flat();
   // console.log("SecondPage  cacheTransactions:", cacheTransactions);
 
