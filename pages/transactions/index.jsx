@@ -52,7 +52,6 @@ const transData = {
 const HomePage = ({ initialData = [] }) => {
   const queryClient = useQueryClient();
 
- 
 
   const [isSkip, setIsSkip] = useState(false);
   const [credentials, setCredentials] = useState(transData);
@@ -73,29 +72,20 @@ const HomePage = ({ initialData = [] }) => {
     .map(([key, data]) => data)
     .filter((data) => data !== undefined)
     .flat()
-    // .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    // .slice(0, -1);
 
   // console.log("dataCacheTrans:", dataCacheTrans);
-  // console.log("HomePage", queryClient.getQueriesData());
+  console.log("HomePage", queryClient.getQueriesData());
 
   
-
-
-
-  const cacheTransactions = queryClient  
-    .getQueryCache()
-    .findAll(["transactions"])
-    .map((item) => item.state?.data)
-    .filter((data) => data !== undefined)
-    .flat()
-    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    .slice(0, -1);
-  console.log("HomePage  cacheTransactions:", cacheTransactions);
+  // const cacheTransactions = queryClient  
+  //   .getQueryCache()
+  //   .findAll(["transactions"])
+  //   .map((item) => item.state?.data)
+  //   .filter((data) => data !== undefined)
+  //   .flat()
+  // console.log("HomePage  cacheTransactions:", cacheTransactions);
 
   
-  // console.log("HomePage  cacheTransactions:", queryClient.getQueryCache());
-
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   
   
@@ -103,28 +93,23 @@ const HomePage = ({ initialData = [] }) => {
     mutationFn: createTransaction,
     onSuccess: (data, variables) => {
 
-      const cache = queryClient.getQueryCache().add((ddd) => {
-      console.log("cache  ddd:", ddd);
+   
 
-       return {
-          queryKey: ["transactions"],
-          state: {
-            data: [data],
-          },
-        }
-      });
+    
+      for (let i = 1; i < pageNum; i += 1) {
+        console.log("hello", i);
+        queryClient.setQueryData(['transactions', i], [])
+        
+      }
 
-     
+      queryClient.setQueryData(['transactions', pageNum], () => {
+        const newCache = [data, ...dataCacheTrans]
+        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+        .slice(0, -1)
+        return newCache
+      })
 
-
-
-      // queryClient.setQueryData(['transactions',pageNum], (old) => {
-      //   const newCache = [data, ...dataCacheTrans]
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   // .slice(0, 6)
-      //   return newCache
-      // })
+      
       
 
       // setPageNum(1);
@@ -162,6 +147,7 @@ const HomePage = ({ initialData = [] }) => {
     //   // setTransactions(data);
     // },
   });
+ 
 
   //================================================================
   // const fetchQuery = async () => {
@@ -259,7 +245,7 @@ const HomePage = ({ initialData = [] }) => {
       </ul> */}
 
       <ul>
-        {cacheTransactions?.map((item) => {
+        {dataCacheTrans?.map((item) => {
           // return item?.state?.data?.map(i => <li key={i._id}>{i.category}</li>)
           return <li key={item._id}>{item.category}</li>;
         })}
@@ -298,6 +284,14 @@ export default HomePage;
 // useEffect(() => {
 //   return () =>  setPokemon([]);
 // }, []);
+
+//============================================================
+   // const cache = queryClient.getQueryCache().add({
+      //   queryKey: ["transactions"],
+      //   state: {
+      //     data: [data],
+      //   },
+      // });
 
 //============================================================
 {
