@@ -14,14 +14,22 @@ import {
 import useSWR from "swr";
 import { createTransaction } from "@/helpers/createTransaction";
 import axios from "axios";
+import moment from "moment/moment";
 
+// const operationDate = 
+// moment(new Date("Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)"))
+// .format("YYYY-MM-DD HH:mm:ss");
+  
 const transData = {
   amount: 500,
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: new Date().toString(),
+  date: "Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)",
+  // date: new Date().toString(),
 };
+
+
 
 // export async function getStaticProps() {
 //   const queryClient = new QueryClient();
@@ -44,6 +52,8 @@ const transData = {
 const HomePage = ({ initialData = [] }) => {
   const queryClient = useQueryClient();
 
+ 
+
   const [isSkip, setIsSkip] = useState(false);
   const [credentials, setCredentials] = useState(transData);
   // const [pageNum, setPageNum] = useState(1);
@@ -51,45 +61,70 @@ const HomePage = ({ initialData = [] }) => {
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
 
+  // const cacheTransactions = queryClient.getQueryCache().add({
+  //   queryKey: ["transactions"],
+  //   state: {
+  //     data: [transData],
+  //   },
+  // });
+
   const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
     .getQueriesData(["transactions"])
     .map(([key, data]) => data)
     .filter((data) => data !== undefined)
-    .flat();
+    .flat()
+    // .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    // .slice(0, -1);
 
-  console.log("dataCacheTrans:", dataCacheTrans);
+  // console.log("dataCacheTrans:", dataCacheTrans);
   // console.log("HomePage", queryClient.getQueriesData());
 
-
-  // const cacheTransactions = queryClient  
-  //   .getQueryCache()
-  //   .findAll(["transactions"])
-  //   .map((item) => item.state?.data)
-  //   .filter((data) => data !== undefined)
-  //   .flat();
-  // console.log("HomePage  cacheTransactions:", cacheTransactions);
+  
 
 
+
+  const cacheTransactions = queryClient  
+    .getQueryCache()
+    .findAll(["transactions"])
+    .map((item) => item.state?.data)
+    .filter((data) => data !== undefined)
+    .flat()
+    .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    .slice(0, -1);
+  console.log("HomePage  cacheTransactions:", cacheTransactions);
+
+  
+  // console.log("HomePage  cacheTransactions:", queryClient.getQueryCache());
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
-  // console.log("HomePage  dataCacheTrans:", dataCacheTrans);
+  
   
   const mutation = useMutation({
     mutationFn: createTransaction,
     onSuccess: (data, variables) => {
 
-      console.log("HomePage  data:", data);
-      queryClient.setQueryData(['transactions',1], (old) => {
-      // console.log("queryClient.setQueryData  old:",old);
+      const cache = queryClient.getQueryCache().add((ddd) => {
+      console.log("cache  ddd:", ddd);
+
+       return {
+          queryKey: ["transactions"],
+          state: {
+            data: [data],
+          },
+        }
+      });
+
+     
 
 
-      //  old.splice(4, 1)
-      //  return old
-       
 
-        return [data, ...old]
-
-      })
+      // queryClient.setQueryData(['transactions',pageNum], (old) => {
+      //   const newCache = [data, ...dataCacheTrans]
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   // .slice(0, 6)
+      //   return newCache
+      // })
       
 
       // setPageNum(1);
@@ -97,6 +132,15 @@ const HomePage = ({ initialData = [] }) => {
       // queryClient.invalidateQueries({ queryKey: ["transactions" ]});
     },
   });
+
+  // queryClient.setQueryData(['transactions',1], () => {
+  //   const newCache = [ ...dataCacheTrans]
+    
+  //   console.log("queryClient.setQueryData  newCache:",newCache);
+  //   return newCache
+    
+  // })
+    
 
 
 
@@ -213,12 +257,14 @@ const HomePage = ({ initialData = [] }) => {
           return <li key={item.name}>{item.name}</li>;
         })}
       </ul> */}
+
       <ul>
-        {dataCacheTrans?.map((item) => {
+        {cacheTransactions?.map((item) => {
           // return item?.state?.data?.map(i => <li key={i._id}>{i.category}</li>)
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
+
       {/* <button type="button" onClick={hount}>
         CLICK
       </button> */}
