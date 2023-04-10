@@ -22,7 +22,7 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Sun Apr 09 2023 19:49:02 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:40:45 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -67,26 +67,76 @@ const HomePage = ({ initialData = [] }) => {
   // console.log("dataCacheTrans:", dataCacheTrans);
   // console.log("HomePage", queryClient.getQueriesData());
 
+ 
+
+  // const ooo = Math.ceil(rrr/5)
+  // console.log("HomePage  ooo:", ooo);
+
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   
+  // let page = null;
+  //     const PAGE_LIMIT = 5;
+
+  //   const rrr =  dataCacheTrans.reduce((acc,item) => {
+        
+  //     if (Date.parse(item.date) > Date.parse(transData.date)) {
+  //       acc += 1;
+  //     }
+      
+  //     if (!(Date.parse(item.date) > Date.parse(transData.date))) {
+  //         console.log("dataCacheTrans.reduce  acc:", acc);
+  //         page = Math.ceil(acc/PAGE_LIMIT);
+  //       }
+  //       return acc;
+        
+  //     },1);
+  //     // console.log("rrr  rrr:", rrr);
+      
+  //     console.log("dataCacheTrans.reduce  page:", page);
+  
+
   const mutation = useMutation({
     mutationFn: createTransaction,
 
     onSuccess: (data, variables) => {
       //==================== One Page Pagination =====================================
-      // const counter = queryClient.getQueriesData().length
-      // let firstIdx = data
-    
-      // for (let i = 1; i <= counter; i += 1) {
-      //   // console.log("hello", i);
-      //   queryClient.setQueryData(['transactions', i], (old) => {
-      //     const newCache  = [firstIdx, ...old].slice(0, -1);
-      //     firstIdx = old.pop();
 
-      //     return newCache;
-      //   }) 
-      // };
+      let page = null;
+      const PAGE_LIMIT = 5;
+
+      dataCacheTrans.reduce((acc,item) => {
+        const isOlder = Date.parse(item.date) > Date.parse(data.date)
+
+        if (isOlder) {
+          acc += 1;
+        }
+    
+        if (!isOlder) {
+          page = Math.ceil(acc/PAGE_LIMIT);
+        }
+        return acc;
+        
+      },1);
+      
+      const dataLength = queryClient.getQueriesData().length;
+      let newData = data;
+    
+     if (page) {
+      for (let i = page; i <= dataLength; i += 1) {
+        // console.log("hello", i);
+        queryClient.setQueryData(['transactions', i], (prev) => {
+          const newCache  = prev
+          .concat(newData)
+          .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+          .slice(0, -1);
+          
+          newData = prev.pop();
+
+          return newCache;
+        }) 
+      };
+     }
 
       //======================Infinity Scroll==========================================
       // setTransactions(prev => {
@@ -136,7 +186,6 @@ const HomePage = ({ initialData = [] }) => {
     staleTime: Infinity,
 
     onSuccess: (todos) => {
-      console.log("heello");
       setTransactions((prev) => [...prev, ...todos]);
       // setTransactions(data);
     },
@@ -145,7 +194,7 @@ const HomePage = ({ initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
-
+    
   };
 
   const onNextPage = () => {
