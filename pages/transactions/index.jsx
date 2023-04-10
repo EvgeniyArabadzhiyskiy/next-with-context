@@ -74,30 +74,6 @@ const HomePage = ({ initialData = [] }) => {
     mutationFn: createTransaction,
 
     onSuccess: (data, variables) => {
-      //========================Infinity Scroll========================================
-      // for (let i = 1; i < pageNum; i += 1) {
-      //   console.log("hello", i);
-      //   queryClient.setQueryData(['transactions', i], []) 
-      // }
-
-      // queryClient.setQueryData(['transactions', pageNum], () => {
-      //   const newCache = dataCacheTrans
-      //   .concat(data)
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   return newCache
-      // })
-
-      //======================Infinity Scroll==========================================
-
-      // setTransactions(prev => {
-      //   const newCache = prev
-      //   .concat(data)
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   return newCache
-      // })
-
       //==================== One Page Pagination =====================================
       // const counter = queryClient.getQueriesData().length
       // let firstIdx = data
@@ -112,22 +88,36 @@ const HomePage = ({ initialData = [] }) => {
       //   }) 
       // };
 
-      //================================================================
-        
-      // queryClient.setQueryData(['transactions', pageNum], (old) => {
-      //   // console.log("queryClient.setQueryData  old:", old);
-        
-      //   const newCache = old
+      //======================Infinity Scroll==========================================
+      // setTransactions(prev => {
+      //   const newCache = prev
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   return newCache
+      // });
+
+      //========================Infinity Scroll========================================
+      // for (let i = 1; i < pageNum; i += 1) {
+      //   console.log("hello", i);
+      //   queryClient.setQueryData(['transactions', i], []) 
+      // }
+
+      // queryClient.setQueryData(['transactions', pageNum], () => {
+      //   const newCache = dataCacheTrans
       //   .concat(data)
       //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
       //   .slice(0, -1)
       //   return newCache
       // })
 
+     
+
       
+
     
       //========== One Page Pagination + новые запросы==================
-      queryClient.removeQueries({ queryKey: ["transactions"] });
+      // queryClient.removeQueries({ queryKey: ["transactions"] });
 
 
       //================================================================
@@ -157,16 +147,6 @@ const HomePage = ({ initialData = [] }) => {
   const fetchQuery = async () => {
 
   };
-
-  //================================================================
-  // const firstRender = useRef(true);
-  // useEffect(() => {
-  //   if (firstRender.current) {
-  //     firstRender.current = false;
-  //     return;
-  //   }
-  //   if (data) setTransactions((prev) => [...prev, ...data]);
-  // }, [data, setTransactions]);
 
   const onNextPage = () => {
     setIsSkip(true);
@@ -241,13 +221,21 @@ export default HomePage;
 //   return () =>  setPokemon([]);
 // }, []);
 
-//============================================================
-   // const cache = queryClient.getQueryCache().add({
-      //   queryKey: ["transactions"],
-      //   state: {
-      //     data: [data],
-      //   },
-      // });
+ //================================================================
+  // const firstRender = useRef(true);
+  // useEffect(() => {
+  //   if (firstRender.current) {
+  //     firstRender.current = false;
+  //     return;
+  //   }
+  //   if (data) setTransactions((prev) => [...prev, ...data]);
+  // }, [data, setTransactions]);
 
-//============================================================
+  //============================================================
+  // const cache = queryClient.getQueryCache().add({
+  //   queryKey: ["transactions"],
+  //   state: {
+  //     data: [data],
+  //   },
+  // });
 
