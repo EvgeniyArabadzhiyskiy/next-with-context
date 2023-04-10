@@ -11,10 +11,7 @@ import {
   useQuery,
   useQueryClient,
 } from "@tanstack/react-query";
-import useSWR from "swr";
 import { createTransaction } from "@/helpers/createTransaction";
-import axios from "axios";
-import moment from "moment/moment";
 
 // const operationDate = 
 // moment(new Date("Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)"))
@@ -59,7 +56,6 @@ const HomePage = ({ initialData = [] }) => {
   // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
-  // console.log("HomePage  transactions:", transactions);
 
 
   const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
@@ -69,18 +65,9 @@ const HomePage = ({ initialData = [] }) => {
     .flat()
 
   // console.log("dataCacheTrans:", dataCacheTrans);
-  console.log("HomePage", queryClient.getQueriesData());
+  // console.log("HomePage", queryClient.getQueriesData());
 
-  
-  // const cacheTransactions = queryClient  
-  //   .getQueryCache()
-  //   .findAll(["transactions"])
-  //   .map((item) => item.state?.data)
-  //   .filter((data) => data !== undefined)
-  //   .flat()
-  // console.log("HomePage  cacheTransactions:", cacheTransactions);
 
-  
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   
   const mutation = useMutation({
@@ -111,7 +98,7 @@ const HomePage = ({ initialData = [] }) => {
       //   return newCache
       // })
 
-      //====================One Page Pagination =====================================
+      //==================== One Page Pagination =====================================
       // const counter = queryClient.getQueriesData().length
       // let firstIdx = data
     
@@ -139,14 +126,7 @@ const HomePage = ({ initialData = [] }) => {
 
       
     
-
-      
-
-      
-
-      
-     
-      //=========================================================
+      //========== One Page Pagination + новые запросы==================
       queryClient.removeQueries({ queryKey: ["transactions"] });
 
 
@@ -175,24 +155,6 @@ const HomePage = ({ initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
-
-
-  //   const cacheTransactions = queryClient.getQueryCache()
-  //   .hasListeners(["transactions"])
-  // console.log("HomePage  cacheTransactions:", cacheTransactions);
-
-    // queryClient.invalidateQueries({ queryKey: ["transactions", 3] });
-    // await queryClient.refetchQueries({ queryKey: ["transactions"] })
-
-    // queryClient.removeQueries({ queryKey:['transactions'] })
-
-    // setPageNum((p) => p + 1);
-    // const data = await queryClient.ensureQueryData({
-    //   queryKey: ["transactions", pageNum],
-    //   queryFn: () => getAllTransactions(pageNum),
-    // });
-    // console.log("fetchQuery  data:", data);
-    // setTransactions((prev) => [...prev, ...data]);
 
   };
 
@@ -240,16 +202,9 @@ const HomePage = ({ initialData = [] }) => {
         <input type="text" name="category" placeholder="Category" />
         <button type="submit">Login</button>
       </form>
-      {/* <h2>{data.name}</h2> */}
-      {/* <ul>
-        {data.results.map((item) => {
-          return <li key={item.name}>{item.name}</li>;
-        })}
-      </ul> */}
-
+      
       <ul>
         {todos?.map((item) => {
-          // return item?.state?.data?.map(i => <li key={i._id}>{i.category}</li>)
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
@@ -266,6 +221,7 @@ export default HomePage;
 //   return data.name;
 // };
 
+//============================================================
 // const WrapperContext = () => (
 //   <HomeProvider>
 //     <HomePage />
@@ -294,14 +250,4 @@ export default HomePage;
       // });
 
 //============================================================
-{
-  /* <form onSubmit={(e) => onNextPage(e)}>
-  <input
-    type="text"
-    onChange={({ target: { value } }) => setSearchValue(value)}
-    value={searchValue}
-  />
 
-  <button type="submit">Next Page</button>
-</form>; */
-}
