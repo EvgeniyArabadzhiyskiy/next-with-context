@@ -25,7 +25,7 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Sun Apr 09 2023 19:49:02 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -59,13 +59,8 @@ const HomePage = ({ initialData = [] }) => {
   // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
+  // console.log("HomePage  transactions:", transactions);
 
-  // const cacheTransactions = queryClient.getQueryCache().add({
-  //   queryKey: ["transactions"],
-  //   state: {
-  //     data: [transData],
-  //   },
-  // });
 
   const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
     .getQueriesData(["transactions"])
@@ -88,45 +83,78 @@ const HomePage = ({ initialData = [] }) => {
   
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   
-  
   const mutation = useMutation({
     mutationFn: createTransaction,
+
     onSuccess: (data, variables) => {
+      //========================Infinity Scroll========================================
+      // for (let i = 1; i < pageNum; i += 1) {
+      //   console.log("hello", i);
+      //   queryClient.setQueryData(['transactions', i], []) 
+      // }
 
-   
+      // queryClient.setQueryData(['transactions', pageNum], () => {
+      //   const newCache = dataCacheTrans
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   return newCache
+      // })
 
+      //======================Infinity Scroll==========================================
+
+      // setTransactions(prev => {
+      //   const newCache = prev
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   return newCache
+      // })
+
+      //====================One Page Pagination =====================================
+      // const counter = queryClient.getQueriesData().length
+      // let firstIdx = data
     
-      for (let i = 1; i < pageNum; i += 1) {
-        console.log("hello", i);
-        queryClient.setQueryData(['transactions', i], [])
+      // for (let i = 1; i <= counter; i += 1) {
+      //   // console.log("hello", i);
+      //   queryClient.setQueryData(['transactions', i], (old) => {
+      //     const newCache  = [firstIdx, ...old].slice(0, -1);
+      //     firstIdx = old.pop();
+
+      //     return newCache;
+      //   }) 
+      // };
+
+      //================================================================
         
-      }
-
-      queryClient.setQueryData(['transactions', pageNum], () => {
-        const newCache = [data, ...dataCacheTrans]
-        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-        .slice(0, -1)
-        return newCache
-      })
+      // queryClient.setQueryData(['transactions', pageNum], (old) => {
+      //   // console.log("queryClient.setQueryData  old:", old);
+        
+      //   const newCache = old
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   return newCache
+      // })
 
       
+    
+
       
 
+      
+
+      
+     
+      //=========================================================
+      queryClient.removeQueries({ queryKey: ["transactions"] });
+
+
+      //================================================================
       // setPageNum(1);
       // queryClient.removeQueries({ queryKey: ["transactions"] });
-      // queryClient.invalidateQueries({ queryKey: ["transactions" ]});
     },
   });
-
-  // queryClient.setQueryData(['transactions',1], () => {
-  //   const newCache = [ ...dataCacheTrans]
-    
-  //   console.log("queryClient.setQueryData  newCache:",newCache);
-  //   return newCache
-    
-  // })
-    
-
 
 
   const { isLoading, data: todos } = useQuery({
@@ -135,42 +163,25 @@ const HomePage = ({ initialData = [] }) => {
     // enabled: isSkip,
     // refetchOnWindowFocus: false,
 
-    // keepPreviousData: true,
-    // cacheTime: 0.3 * (60 * 1000),
-    // staleTime: 0.2 * (60 * 1000),
     staleTime: Infinity,
 
-    // select: (data) => data.transactions,
-
-    // onSuccess: (data) => {
-    //   setTransactions((prev) => [...prev, ...data]);
-    //   // setTransactions(data);
-    // },
+    onSuccess: (todos) => {
+      console.log("heello");
+      setTransactions((prev) => [...prev, ...todos]);
+      // setTransactions(data);
+    },
   });
  
 
   //================================================================
-  // const fetchQuery = async () => {
-  //   setPageNum((p) => p + 1);
-
-  //   const data = await queryClient.fetchQuery({
-  //     queryKey: ["transactions", pageNum],
-  //     queryFn: () => getAllTransactions(pageNum),
-  //   });
-
-  //   setTransactions((prev) => [...prev, ...data]);
-  // };
-
-  //================================================================
   const fetchQuery = async () => {
 
-    queryClient.setQueryData(['transactions',pageNum], (old) => {
-      // console.log("queryClient.setQueryData  old:",old);
-      old.splice(4, 1)
-      return old
-    })
 
-    // queryClient.invalidateQueries({ queryKey: ["transactions"] });
+  //   const cacheTransactions = queryClient.getQueryCache()
+  //   .hasListeners(["transactions"])
+  // console.log("HomePage  cacheTransactions:", cacheTransactions);
+
+    // queryClient.invalidateQueries({ queryKey: ["transactions", 3] });
     // await queryClient.refetchQueries({ queryKey: ["transactions"] })
 
     // queryClient.removeQueries({ queryKey:['transactions'] })
@@ -195,20 +206,12 @@ const HomePage = ({ initialData = [] }) => {
   //   if (data) setTransactions((prev) => [...prev, ...data]);
   // }, [data, setTransactions]);
 
-  const onNextPage = (e) => {
+  const onNextPage = () => {
     setIsSkip(true);
     setPageNum((p) => p + 1);
-
-   
   };
 
   // const toggleVisible = () => setIsShow((p) => !p);
-
-  // const hount = () => console.log("HELLO");
-
-  // if (isLoading) {
-  //   return <h1>Loading...</h1>
-  // }
 
   const onCreate = async (e) => {
     e.preventDefault();
@@ -245,15 +248,12 @@ const HomePage = ({ initialData = [] }) => {
       </ul> */}
 
       <ul>
-        {dataCacheTrans?.map((item) => {
+        {todos?.map((item) => {
           // return item?.state?.data?.map(i => <li key={i._id}>{i.category}</li>)
           return <li key={item._id}>{item.category}</li>;
         })}
       </ul>
 
-      {/* <button type="button" onClick={hount}>
-        CLICK
-      </button> */}
     </>
   );
 };
