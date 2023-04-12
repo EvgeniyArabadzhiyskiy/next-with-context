@@ -94,6 +94,17 @@ const HomePage = ({ initialData = [] }) => {
   //     // console.log("rrr  rrr:", rrr);
       
   //     console.log("dataCacheTrans.reduce  page:", page);
+
+
+  // const ggg = dataCacheTrans.map(item => {
+  //   const isOlder = Date.parse(item.date) > Date.parse(transData.date)
+
+  //   if (isOlder) {
+  //     return true
+  //   }
+  //   return false
+  // }).indexOf(false)
+  // console.log("ggg  ggg:", Math.ceil((ggg + 1 )/5));
   
 
   const mutation = useMutation({
