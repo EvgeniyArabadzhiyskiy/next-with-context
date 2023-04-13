@@ -134,7 +134,7 @@ const HomePage = ({ initialData = [] }) => {
       const dataLength = queryClient.getQueriesData().length;
       let newData = data;
     
-     if (page) {
+    //  if (page) {
       console.log("Hello");
       for (let i = page; i <= dataLength; i += 1) {
         // console.log("hello", i);
@@ -149,7 +149,7 @@ const HomePage = ({ initialData = [] }) => {
           return newCache;
         }) 
       };
-     }
+    //  }
 
       //======================Infinity Scroll==========================================
       // setTransactions(prev => {
