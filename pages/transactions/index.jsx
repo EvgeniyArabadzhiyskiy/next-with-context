@@ -96,15 +96,14 @@ const HomePage = ({ initialData = [] }) => {
   //     console.log("dataCacheTrans.reduce  page:", page);
 
 
-  const ggg = dataCacheTrans.map(item => {
-    const isOlder = Date.parse(item.date) > Date.parse(transData.date)
+  // const ggg = dataCacheTrans.map(item => {
+  //   const isOlder = Date.parse(item.date) > Date.parse(transData.date)
 
-    if (isOlder) {
-      return true
-    }
-    return false
-  }).indexOf(false)
-  // console.log("ggg  ggg:", ggg);
+  //   if (isOlder) {
+  //     return true
+  //   }
+  //   return false
+  // }).indexOf(false)
   // console.log("ggg  ggg:", Math.ceil((ggg + 1 )/5));
   
 
@@ -134,8 +133,7 @@ const HomePage = ({ initialData = [] }) => {
       const dataLength = queryClient.getQueriesData().length;
       let newData = data;
     
-    //  if (page) {
-      console.log("Hello");
+     if (page) {
       for (let i = page; i <= dataLength; i += 1) {
         // console.log("hello", i);
         queryClient.setQueryData(['transactions', i], (prev) => {
@@ -149,7 +147,7 @@ const HomePage = ({ initialData = [] }) => {
           return newCache;
         }) 
       };
-    //  }
+     }
 
       //======================Infinity Scroll==========================================
       // setTransactions(prev => {
