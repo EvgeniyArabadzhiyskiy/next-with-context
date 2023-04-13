@@ -104,7 +104,7 @@ const HomePage = ({ initialData = [] }) => {
     }
     return false
   }).indexOf(false)
-  console.log("ggg  ggg:", ggg);
+  // console.log("ggg  ggg:", ggg);
   // console.log("ggg  ggg:", Math.ceil((ggg + 1 )/5));
   
 
@@ -135,6 +135,7 @@ const HomePage = ({ initialData = [] }) => {
       let newData = data;
     
      if (page) {
+      console.log("Hello");
       for (let i = page; i <= dataLength; i += 1) {
         // console.log("hello", i);
         queryClient.setQueryData(['transactions', i], (prev) => {
