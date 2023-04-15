@@ -35,10 +35,10 @@ const SecondPage = () => {
   // .find(["transactions", pageNum])
   // ?.state.data
 
-  const { count, setCount } = useContext(HomeContext);
+  // const { count, setCount } = useContext(HomeContext);
 
-  const incrementCount = () => setCount((p) => p + 1);
-  const decrementCount = () => setCount((p) => p - 1);
+  // const incrementCount = () => setCount((p) => p + 1);
+  // const decrementCount = () => setCount((p) => p - 1);
 
   const onCreate = async (e) => {
     e.preventDefault();
