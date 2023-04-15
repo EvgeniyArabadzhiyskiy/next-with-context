@@ -8,6 +8,6 @@ const BASE_URL = "https://wallet-backend-xmk0.onrender.com/api";
 
 export const createTransaction = async (transaction) => {
   const {data} = await axios.post(`${BASE_URL}${TRANSACTIONS}`, transaction);
-  // console.log("SecondPage  data:", data);
+  console.log("SecondPage  data:", data);
   return data;
 };
