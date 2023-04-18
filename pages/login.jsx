@@ -44,7 +44,7 @@ const LoginPage = () => {
     staleTime: Infinity,
     onSuccess: async () => {
       // console.log('PREFETCH');
-      // await queryClient.prefetchQuery(["transactions"], () => getAllTransactions(1));
+      await queryClient.prefetchQuery(["transactions", 1], () => getAllTransactions(1));
     }
   });
 
