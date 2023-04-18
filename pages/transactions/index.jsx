@@ -187,24 +187,38 @@ const HomePage = ({ initialData = [] }) => {
   });
 
 
-  const { isLoading, data: todos } = useQuery({
+  const { isLoading, data: todos, isPreviousData } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
     // enabled: isSkip,
     // refetchOnWindowFocus: false,
 
     staleTime: Infinity,
+    keepPreviousData: true,
 
-    onSuccess: (todos) => {
+    onSuccess:  (todos) => {
       setTransactions((prev) => [...prev, ...todos]);
       // setTransactions(data);
     },
   });
+  // console.log("HomePage  isPreviousData:", isPreviousData);
+
+  // useEffect(() => {
+  //   if (!isPreviousData && todos) {
+  //     queryClient.prefetchQuery({
+  //       queryKey: ["transactions", pageNum + 1],
+  //       queryFn: () => getAllTransactions(pageNum + 1),
+  //     })
+  //   }
+  // }, [isPreviousData, pageNum, queryClient, todos])
  
 
   //================================================================
   const fetchQuery = async () => {
-    
+    // queryClient.prefetchQuery({
+    //   queryKey: ["transactions", pageNum + 1],
+    //   queryFn: () => getAllTransactions(pageNum + 1),
+    // })
   };
 
   const onNextPage = () => {
