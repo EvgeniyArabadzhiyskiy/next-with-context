@@ -25,6 +25,7 @@ export default function Home() {
           <div>
             <Link href="/transactions">Transactions</Link>
             <Link href="/transactions/second">SECOND</Link>
+            <Link href="/transactions/infinite">INFINITY</Link>
           </div>
         </div>
 
