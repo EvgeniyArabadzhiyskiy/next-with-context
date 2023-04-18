@@ -31,11 +31,14 @@ const transData = {
 // export async function getStaticProps() {
 //   const queryClient = new QueryClient();
 
-//   await queryClient.prefetchQuery(["transactions"], () => getAllTransactions(1));
+//   // const data = await queryClient.fetchQuery(["transactions", 1], () => getAllTransactions(1));
+  
+//    await queryClient.prefetchQuery(["transactions", 1], () => getAllTransactions(1));
 
 //   return {
 //     props: {
 //       dehydratedState: dehydrate(queryClient),
+//       // initialData: data
 
 //     },
 //   };
@@ -46,7 +49,9 @@ const transData = {
 //   return { props: { initialData } };
 // }
 
-const HomePage = ({ initialData = [] }) => {
+const HomePage = ({dehydratedState, initialData = [] }) => {
+  // console.log("HomePage  initialData:", initialData);
+  // console.log("HomePage  dehydratedState:", dehydratedState.queries[0].state.data);
   const queryClient = useQueryClient();
 
 
@@ -68,31 +73,10 @@ const HomePage = ({ initialData = [] }) => {
   // console.log("HomePage", queryClient.getQueriesData());
 
   
-  // const ooo = Math.ceil(rrr/5)
-  // console.log("HomePage  ooo:", ooo);
-
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
   
-  // let page = null;
-  //     const PAGE_LIMIT = 5;
-
-  //   const rrr =  dataCacheTrans.reduce((acc,item) => {
-        
-  //     if (Date.parse(item.date) > Date.parse(transData.date)) {
-  //       acc += 1;
-  //     }
-      
-  //     if (!(Date.parse(item.date) > Date.parse(transData.date))) {
-  //         console.log("dataCacheTrans.reduce  acc:", acc);
-  //         page = Math.ceil(acc/PAGE_LIMIT);
-  //       }
-  //       return acc;
-        
-  //     },1);
-  //     // console.log("rrr  rrr:", rrr);
-      
-  //     console.log("dataCacheTrans.reduce  page:", page);
+ 
 
 
   // const ggg = dataCacheTrans.map(item => {
@@ -196,12 +180,11 @@ const HomePage = ({ initialData = [] }) => {
     staleTime: Infinity,
     keepPreviousData: true,
 
-    onSuccess:  (todos) => {
-      setTransactions((prev) => [...prev, ...todos]);
+    onSuccess: (data) => {
+      setTransactions((prev) => [...prev, ...data]);
       // setTransactions(data);
     },
   });
-  // console.log("HomePage  isPreviousData:", isPreviousData);
 
   // useEffect(() => {
   //   if (!isPreviousData && todos) {
@@ -215,11 +198,13 @@ const HomePage = ({ initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
-    // queryClient.prefetchQuery({
-    //   queryKey: ["transactions", pageNum + 1],
-    //   queryFn: () => getAllTransactions(pageNum + 1),
-    // })
+  
   };
+
+  const onDelete = (id) => {
+  console.log("onDelete  id:", id);
+
+  }
 
   const onNextPage = () => {
     setIsSkip(true);
@@ -236,7 +221,7 @@ const HomePage = ({ initialData = [] }) => {
   return (
     <>
       <h1>Home Page</h1>
-      <Link href="/">HOME</Link> <Link href="/transactions/second">SECOND</Link>
+      <Link href="/">HOME</Link> <Link href="/transactions/infinite">SECOND</Link>
       {/* {isShow && <About />}
       <button type="button" onClick={toggleVisible}>
         {isShow ? "Скрыть" : "Показать"}
@@ -258,7 +243,11 @@ const HomePage = ({ initialData = [] }) => {
       
       <ul>
         {todos?.map((item) => {
-          return <li key={item._id}>{item.category}</li>;
+          return (
+          <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
+            <li>{item.category}</li>
+            <button  type="button" onClick={() => onDelete(item._id)}> Delete</button>
+          </div>)
         })}
       </ul>
 
