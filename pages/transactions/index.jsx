@@ -67,8 +67,7 @@ const HomePage = ({ initialData = [] }) => {
   // console.log("dataCacheTrans:", dataCacheTrans);
   // console.log("HomePage", queryClient.getQueriesData());
 
- 
-
+  
   // const ooo = Math.ceil(rrr/5)
   // console.log("HomePage  ooo:", ooo);
 
@@ -130,7 +129,7 @@ const HomePage = ({ initialData = [] }) => {
         
       },1);
       
-      const dataLength = queryClient.getQueriesData().length;
+      const dataLength = queryClient.getQueriesData(["transactions"]).length;
       let newData = data;
     
      if (page) {
@@ -149,7 +148,7 @@ const HomePage = ({ initialData = [] }) => {
       };
      }
 
-      //======================Infinity Scroll==========================================
+      //======================Infinity Scroll with Context==========================================
       // setTransactions(prev => {
       //   const newCache = prev
       //   .concat(data)
@@ -158,7 +157,7 @@ const HomePage = ({ initialData = [] }) => {
       //   return newCache
       // });
 
-      //========================Infinity Scroll========================================
+      //========================Infinity Scroll with Cache========================================
       // for (let i = 1; i < pageNum; i += 1) {
       //   console.log("hello", i);
       //   queryClient.setQueryData(['transactions', i], []) 
