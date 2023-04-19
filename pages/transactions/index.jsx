@@ -12,6 +12,9 @@ import {
   useQueryClient,
 } from "@tanstack/react-query";
 import { createTransaction } from "@/helpers/createTransaction";
+import { useCreateTransaction } from "@/hooks/useCreateTransaction";
+import { updateCacheTransaction } from "@/helpers/updateCacheTransaction";
+import { deleteTransaction } from "@/helpers/deleteTransaction";
 
 // const operationDate = 
 // moment(new Date("Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)"))
@@ -22,7 +25,8 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Wed Apr 05 2023 21:40:45 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Sun Apr 09 2023 16:49:02 GMT+0300 (Восточная Европа, летнее время)",
+  // date: "Wed Apr 05 2023 21:40:45 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -62,112 +66,139 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
 
+  // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
 
-  const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
-    .getQueriesData(["transactions"])
-    .map(([key, data]) => data)
-    .filter((data) => data !== undefined)
-    .flat()
+  // const dataCacheTrans = queryClient      //// ЕСЛИ данные  собираются в один массив
+  //   .getQueriesData(["transactions"])
+  //   .map(([key, data]) => data)
+  //   .filter((data) => data !== undefined)
+  //   .flat()
 
   // console.log("dataCacheTrans:", dataCacheTrans);
   // console.log("HomePage", queryClient.getQueriesData());
 
   
 
-  // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
+
+  
   
  
 
+  // const mutation = useMutation({
+  //   mutationFn: createTransaction,
 
-  // const ggg = dataCacheTrans.map(item => {
-  //   const isOlder = Date.parse(item.date) > Date.parse(transData.date)
+  //   onSuccess: (data, variables) => {
+  //     //==================== One Page Pagination =====================================
 
-  //   if (isOlder) {
-  //     return true
-  //   }
-  //   return false
-  // }).indexOf(false)
-  // console.log("ggg  ggg:", Math.ceil((ggg + 1 )/5));
-  
+  //     let page = null;
+  //     const PAGE_LIMIT = 5;
+
+  //     dataCacheTrans.reduce((acc,item) => {
+  //       const isOlder = Date.parse(item.date) > Date.parse(data.date)
+
+  //       if (isOlder) {
+  //         acc += 1;
+  //       }
+    
+  //       if (!isOlder) {
+  //         page = Math.ceil(acc/PAGE_LIMIT);
+  //       }
+  //       return acc;
+        
+  //     },1);
+      
+  //     const dataLength = queryClient.getQueriesData(["transactions"]).length;
+  //     let newData = data;
+    
+  //    if (page) {
+  //     for (let i = page; i <= dataLength; i += 1) {
+  //       // console.log("hello", i);
+  //       queryClient.setQueryData(['transactions', i], (prev) => {
+  //         const newCache  = prev
+  //         .concat(newData)
+  //         .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+  //         .slice(0, -1);
+          
+  //         newData = prev.pop();
+
+  //         return newCache;
+  //       }) 
+  //     };
+  //    }
+
+  //     //======================Infinity Scroll with Context==========================================
+  //     // setTransactions(prev => {
+  //     //   const newCache = prev
+  //     //   .concat(data)
+  //     //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+  //     //   .slice(0, -1)
+  //     //   return newCache
+  //     // });
+
+  //     //========================Infinity Scroll with Cache========================================
+  //     // for (let i = 1; i < pageNum; i += 1) {
+  //     //   console.log("hello", i);
+  //     //   queryClient.setQueryData(['transactions', i], []) 
+  //     // }
+
+  //     // queryClient.setQueryData(['transactions', pageNum], () => {
+  //     //   const newCache = dataCacheTrans
+  //     //   .concat(data)
+  //     //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+  //     //   .slice(0, -1)
+  //     //   return newCache
+  //     // })
+
+
+  //     //========== One Page Pagination + новые запросы==================
+  //     // queryClient.removeQueries({ queryKey: ["transactions"] });
+
+
+  //     //================================================================
+  //     // setPageNum(1);
+  //     // queryClient.removeQueries({ queryKey: ["transactions"] });
+  //   },
+  // });
+
+  const { mutate: createTransaction } = useCreateTransaction()
 
   const mutation = useMutation({
-    mutationFn: createTransaction,
+    mutationFn: deleteTransaction,
 
-    onSuccess: (data, variables) => {
-      //==================== One Page Pagination =====================================
+    onSuccess: async (data) => {
 
-      let page = null;
-      const PAGE_LIMIT = 5;
+      const lastPage = await getAllTransactions(pageNum)
+      const cutOffTrans = lastPage.pop();
 
-      dataCacheTrans.reduce((acc,item) => {
-        const isOlder = Date.parse(item.date) > Date.parse(data.date)
 
-        if (isOlder) {
-          acc += 1;
-        }
-    
-        if (!isOlder) {
-          page = Math.ceil(acc/PAGE_LIMIT);
-        }
-        return acc;
+      queryClient.setQueryData(["transactions", 1], (prev) => {
+        const newCache = prev
+        .filter(item => item._id !== data._id)
+        .concat(cutOffTrans)
+        console.log("onSuccess:  newCache:", newCache);
         
-      },1);
+        return newCache;
+
+        return newCache;
+      });
+
+
+
+
       
-      const dataLength = queryClient.getQueriesData(["transactions"]).length;
-      let newData = data;
-    
-     if (page) {
-      for (let i = page; i <= dataLength; i += 1) {
-        // console.log("hello", i);
-        queryClient.setQueryData(['transactions', i], (prev) => {
-          const newCache  = prev
-          .concat(newData)
-          .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-          .slice(0, -1);
-          
-          newData = prev.pop();
-
-          return newCache;
-        }) 
-      };
-     }
-
-      //======================Infinity Scroll with Context==========================================
       // setTransactions(prev => {
+      //   // console.log("onSuccess:  prev:", prev);
+        
       //   const newCache = prev
-      //   .concat(data)
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   return newCache
+      //   .filter(item => item._id !== data._id)
+      //   .concat(cutOffTrans)
+      //   // console.log("onSuccess:  newCache:", newCache);
+        
+      //   return newCache;
       // });
-
-      //========================Infinity Scroll with Cache========================================
-      // for (let i = 1; i < pageNum; i += 1) {
-      //   console.log("hello", i);
-      //   queryClient.setQueryData(['transactions', i], []) 
-      // }
-
-      // queryClient.setQueryData(['transactions', pageNum], () => {
-      //   const newCache = dataCacheTrans
-      //   .concat(data)
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   return newCache
-      // })
-
-     
-
-      
-
-    
-      //========== One Page Pagination + новые запросы==================
-      // queryClient.removeQueries({ queryKey: ["transactions"] });
-
-
-      //================================================================
-      // setPageNum(1);
-      // queryClient.removeQueries({ queryKey: ["transactions"] });
     },
+      
+      
   });
 
 
@@ -202,8 +233,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   };
 
   const onDelete = (id) => {
-  console.log("onDelete  id:", id);
-
+    mutation.mutate(id)
   }
 
   const onNextPage = () => {
@@ -215,7 +245,8 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   const onCreate = async (e) => {
     e.preventDefault();
-    mutation.mutate(credentials);
+    createTransaction(credentials)
+    // mutation.mutate(credentials);
   };
 
   return (
