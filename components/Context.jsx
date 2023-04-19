@@ -11,7 +11,7 @@ const ContextProvider = ({ children }) => {
   // const firstRender = useRef(true);
 
   const [pageNum, setPageNum] = useState(1);
-  const [transactions, setTransactions] = useState(null);
+  const [transactions, setTransactions] = useState([]);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
 
