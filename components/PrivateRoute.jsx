@@ -1,17 +1,30 @@
 import { refreshUser } from "@/helpers/refreshUser";
 import { useQuery } from "@tanstack/react-query";
+import { parseCookies } from "nookies";
+import { HomeContext } from "./Context";
 
 const { useRouter } = require("next/router");
-const { useEffect } = require("react");
+const { useEffect, useContext } = require("react");
 
 const PrivateRoute = ({ protectedRoutes, children }) => {
-  const { data: user } = useQuery({
-    queryKey: ["user"],
-    queryFn: refreshUser,
-  });
-  // console.log("App  user:", user);
+  const { authToken } = parseCookies();
+  const { isLoggedIn, setIsLoggedIn } = useContext(HomeContext);
+  // console.log("PrivateRoute  authToken:", authToken);
+
+  // const { data: user } = useQuery({
+  //   queryKey: ["user"],
+  //   queryFn:  refreshUser,
+  //   enabled: !!authToken,
+
+  //   onSuccess: (data) => {
+  //     setIsLoggedIn(true)
+  //   },
+  // });
+
 
   const router = useRouter();
+  
+
   // const { isLoggedIn, token } = useSelector((s) => s.auth);
 
   // const isProtected = protectedRoutes.indexOf(router.pathname) !== -1;
