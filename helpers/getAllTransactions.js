@@ -1,6 +1,6 @@
 import axios from "axios";
 
-const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYTM0ZGFhMTQyNGVhZDExNWVhNTJhNSIsImlhdCI6MTY4MDcwNTM0NCwiZXhwIjoxNjgxOTE0OTQ0fQ.7ZeYJofwN1YSSCb_MyE7t8NTW8srhYNdCLw1ITqyKTg`;
+const token = `eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjYzYTM0ZGFhMTQyNGVhZDExNWVhNTJhNSIsImlhdCI6MTY4MTkxOTE2OSwiZXhwIjoxNjgzMTI4NzY5fQ.fFYovuw16WC6wzaD0ZJ47DJGiRxTy9iLrcr922rZMNE`;
 axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
 
 export const getAllTransactions = async (pageNum = 1) => {
