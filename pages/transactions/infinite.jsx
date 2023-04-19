@@ -5,6 +5,8 @@ import { getAllTransactions } from "@/helpers/getAllTransactions";
 import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HomeContext } from "@/components/Context";
 import { createTransaction } from "@/helpers/createTransaction";
+import { useCreateTransactionInfinity } from "@/hooks/useCreateTransactionInfinity";
+import { deleteTransaction } from "@/helpers/deleteTransaction";
 
 const getPokemonsList = async (
   page = "https://pokeapi.co/api/v2/pokemon?offset=0&limit=10"
@@ -19,16 +21,20 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Wed Apr 05 2023 22:43:44 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Sun Apr 09 2023 16:49:02 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
 const InfinitePage = () => {
-  const queryClient = useQueryClient();
   const [credentials, setCredentials] = useState(transData);
-  const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
-  // console.log("InfinitePage  transactions:", transactions);
+  // const [clearTimeout, setClearTimeout] = useState();
+  const clearTO = useRef(null)
+  console.log("InfinitePage  clearTO:", clearTO.current);
   
+  const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
+  
+  const queryClient = useQueryClient();
+  // console.log("HomePage", queryClient.getQueriesData());
   
   // const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
   //   useInfiniteQuery({
@@ -38,112 +44,75 @@ const InfinitePage = () => {
   //   });
 
 
-  const mutation = useMutation({
-    mutationFn: createTransaction,
+  // const mutation = useMutation({
+  //   mutationFn: createTransaction,
 
-    onSuccess: (data, variables) => {
-      //==================== One Page Pagination =====================================
+  //   onSuccess: (data) => {
+  //     setTransactions(prev => {
+  //       const newCache = prev
+  //       .concat(data)
+  //       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+  //       .slice(0, -1);
 
-      // let page = null;
-      // const PAGE_LIMIT = 5;
-
-      // dataCacheTrans.reduce((acc,item) => {
-      //   const isOlder = Date.parse(item.date) > Date.parse(data.date)
-
-      //   if (isOlder) {
-      //     acc += 1;
-      //   }
-    
-      //   if (!isOlder) {
-      //     page = Math.ceil(acc/PAGE_LIMIT);
-      //   }
-      //   return acc;
-        
-      // },1);
+  //       return newCache;
+  //     });
+  //   },
       
-      // const dataLength = queryClient.getQueriesData(["transactions"]).length;
-      // let newData = data;
-    
-    //  if (page) {
-    //   for (let i = page; i <= dataLength; i += 1) {
-    //     // console.log("hello", i);
-    //     queryClient.setQueryData(['transactions', i], (prev) => {
-    //       const newCache  = prev
-    //       .concat(newData)
-    //       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    //       .slice(0, -1);
-          
-    //       newData = prev.pop();
+  // });
 
-    //       return newCache;
-    //     }) 
-    //   };
-    //  }
+  const { mutate: removeTransaction } = useMutation({
+    mutationFn: deleteTransaction,
 
-      //======================Infinity Scroll with Context==========================================
+    onSuccess: async (data) => {
+      const lastPage = await getAllTransactions(pageNum - 1)
+      const cutOffTrans = lastPage.pop();
+      
       setTransactions(prev => {
-        // console.log("InfinitePage  prev:", prev);
-        // const newCache = prev
-        // .concat(data)
-        // .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-        // .slice(0, -1)
-        // console.log("InfinitePage  newCache:", newCache);
-        // return newCache
+        const newCache = prev
+        .filter(item => item._id !== data._id)
+        .concat(cutOffTrans)
+        
+        return newCache;
       });
-
-      //========================Infinity Scroll with Cache========================================
-      // for (let i = 1; i < pageNum; i += 1) {
-      //   console.log("hello", i);
-      //   queryClient.setQueryData(['transactions', i], []) 
-      // }
-
-      // queryClient.setQueryData(['transactions', pageNum], () => {
-      //   const newCache = dataCacheTrans
-      //   .concat(data)
-      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-      //   .slice(0, -1)
-      //   return newCache
-      // })
-
-    
     },
       
   });
 
+  const { mutate: createTransaction } = useCreateTransactionInfinity(setTransactions)
 
-  // console.log("HomePage", queryClient.getQueriesData(["transactionsList"]));
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  useInfiniteQuery({
-    queryKey: ["transactionsList"],
-    queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
-    getNextPageParam: (lastPage, allPages) => {
-      const nextPage = allPages.length + 1;
-      // console.log("InfinitePage  nextPage:", nextPage);
-      
-      return lastPage.length !== 0 ? nextPage : undefined;
-    },
+    useInfiniteQuery({
+      queryKey: ["transactionsList"],
+      queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
+      getNextPageParam: (lastPage, allPages) => {
+        const nextPage = allPages.length + 1;
+        
+        return lastPage.length !== 0 ? nextPage : undefined;
+      },
 
-    staleTime: Infinity,
-      // staleTime: 100000,
-      // cacheTime: 12000,
+      staleTime: Infinity,
+        // staleTime: 100000,
+        // cacheTime: 12000,
 
-    onSuccess: (data) => {
-        console.log("InfinitePage  data:", data.pages.flat());
-      // setTransactions(data.pages.flat());
-        setTransactions(data);
-    },
-  });
+      onSuccess: (data) => {
 
-    // console.log("InfinitePage  data:", data);
-    
+        setPageNum(prev => prev + 1)
+
+        const currentIdx = data.pages.length - 1
+        const currentPage = data.pages[currentIdx]
+        
+        setTransactions((prev) => [...prev, ...currentPage]);
+        // setTransactions(data.pages.flat());
+        // setTransactions(data);
+      },
+    });
+
+   
   const observerElem = useRef(null);  
  
   const handleObserver = useCallback((entries) => {
-    // console.log("handleObserver  hasNextPage:", hasNextPage);
-    // console.log("handleObserver  entries[0].isIntersecting:", entries[0].isIntersecting);
     if(entries[0].isIntersecting && hasNextPage) {
-      // console.log("next Page");
       fetchNextPage()
     }
   }, [fetchNextPage, hasNextPage])
@@ -161,7 +130,16 @@ const InfinitePage = () => {
 
   const onCreate = async (e) => {
     e.preventDefault();
-    mutation.mutate(credentials);
+    createTransaction(credentials);
+  };
+
+  const onDelete = (id) => {
+    clearTO.current =  setTimeout(() => {
+      removeTransaction(id);
+    }, 1000);
+
+
+    
   };
 
   return (
@@ -177,7 +155,7 @@ const InfinitePage = () => {
         <button type="submit">Login</button>
       </form>
 
-      <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
+      {/* <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
         {transactions?.pages.map((group) => {
           return group.map((item) => {
             return (
@@ -191,25 +169,26 @@ const InfinitePage = () => {
         <div ref={observerElem} style={{ height: "50px", background: "tomato" }}>
           {isFetchingNextPage && hasNextPage ? "Loading..." : "No search left"}
         </div>
-        
-      </div>
+      </div> */}
 
 
-      {/* <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
+      <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
        
         {transactions?.map((item) => {
           return (
-            <li style={{ height: "30px", fontSize: "20px" }} key={item._id}>
+          <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
+            <li style={{ height: "30px", fontSize: "20px" }} >
               {item.category}
             </li>
+              <button  type="button" onClick={() => onDelete(item._id)}> Delete</button>
+          </div>
           );
         })}
 
         <div ref={observerElem} style={{ height: "50px", background: "tomato" }}>
           {isFetchingNextPage && hasNextPage ? "Loading..." : "No search left"}
-        </div>
-        
-      </div> */}
+        </div> 
+      </div>
 
       {/* {data?.pages.map((group) => {
         return group.response.map((pokemon) => {
