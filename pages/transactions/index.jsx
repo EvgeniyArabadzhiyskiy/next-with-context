@@ -62,7 +62,6 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   const [isSkip, setIsSkip] = useState(false);
   const [credentials, setCredentials] = useState(transData);
-  const [openedPage, setOpenedPage] = useState(0);
    
   // const [pageNum, setPageNum] = useState(1);
   // const [transactions, setTransactions] = useState([]);
@@ -135,6 +134,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
         .concat(data)
         .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
         .slice(0, -1)
+        
         return newCache
       });
 
@@ -167,14 +167,16 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      const lastPage = await getAllTransactions(openedPage)
+      const PAGE_LIMIT = 5;
+      const lastPageNumber =  transactions.length / PAGE_LIMIT;
+
+      const lastPage = await getAllTransactions(lastPageNumber)
       const cutOffTrans = lastPage.pop();
 
       setTransactions(prev => {
         const newCache = prev
         .filter(item => item._id !== data._id)
-        .concat(cutOffTrans)
-        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+        .concat(cutOffTrans);
         
         return newCache;
       });
@@ -194,7 +196,6 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     keepPreviousData: true,
 
     onSuccess: (data) => {
-      setOpenedPage(p => p + 1)
       setTransactions((prev) => [...prev, ...data]);
       // setTransactions(data);
     },
