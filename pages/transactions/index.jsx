@@ -3,7 +3,7 @@ import HomeProvider, { HomeContext } from "@/components/Context";
 import { fetchPokemon } from "@/helpers/fetchPokemon";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
 import Link from "next/link";
-import { useEffect, useContext, useState, useRef } from "react";
+import { useEffect, useContext, useState, useRef, useMemo, useCallback } from "react";
 import {
   dehydrate,
   QueryClient,
@@ -15,6 +15,7 @@ import { createTransaction } from "@/helpers/createTransaction";
 import { useCreateTransaction } from "@/hooks/useCreateTransaction";
 import { updateCacheTransaction } from "@/helpers/updateCacheTransaction";
 import { deleteTransaction } from "@/helpers/deleteTransaction";
+import { getCurrentTransactions } from "@/helpers/getCurrentTransactions";
 
 // const operationDate = 
 // moment(new Date("Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)"))
@@ -61,6 +62,8 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   const [isSkip, setIsSkip] = useState(false);
   const [credentials, setCredentials] = useState(transData);
+  const [openedPage, setOpenedPage] = useState(0);
+   
   // const [pageNum, setPageNum] = useState(1);
   // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
@@ -82,120 +85,99 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   
   
- 
+  // const { mutate: createTrans } = useCreateTransaction()  // Custom Hook
 
-  // const mutation = useMutation({
-  //   mutationFn: createTransaction,
+  const { mutate: createTrans }  = useMutation({
+    mutationFn: createTransaction,
 
-  //   onSuccess: (data, variables) => {
-  //     //==================== One Page Pagination =====================================
+    onSuccess: (data, variables) => {
+      //==================== One Page Pagination =====================================
 
-  //     let page = null;
-  //     const PAGE_LIMIT = 5;
+    //   let page = null;
+    //   const PAGE_LIMIT = 5;
 
-  //     dataCacheTrans.reduce((acc,item) => {
-  //       const isOlder = Date.parse(item.date) > Date.parse(data.date)
+    //   dataCacheTrans.reduce((acc,item) => {
+    //     const isOlder = Date.parse(item.date) > Date.parse(data.date)
 
-  //       if (isOlder) {
-  //         acc += 1;
-  //       }
+    //     if (isOlder) {
+    //       acc += 1;
+    //     }
     
-  //       if (!isOlder) {
-  //         page = Math.ceil(acc/PAGE_LIMIT);
-  //       }
-  //       return acc;
+    //     if (!isOlder) {
+    //       page = Math.ceil(acc/PAGE_LIMIT);
+    //     }
+    //     return acc;
         
-  //     },1);
+    //   },1);
       
-  //     const dataLength = queryClient.getQueriesData(["transactions"]).length;
-  //     let newData = data;
+    //   const dataLength = queryClient.getQueriesData(["transactions"]).length;
+    //   let newData = data;
     
-  //    if (page) {
-  //     for (let i = page; i <= dataLength; i += 1) {
-  //       // console.log("hello", i);
-  //       queryClient.setQueryData(['transactions', i], (prev) => {
-  //         const newCache  = prev
-  //         .concat(newData)
-  //         .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  //         .slice(0, -1);
+    //  if (page) {
+    //   for (let i = page; i <= dataLength; i += 1) {
+    //     // console.log("hello", i);
+    //     queryClient.setQueryData(['transactions', i], (prev) => {
+    //       const newCache  = prev
+    //       .concat(newData)
+    //       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+    //       .slice(0, -1);
           
-  //         newData = prev.pop();
+    //       newData = prev.pop();
 
-  //         return newCache;
-  //       }) 
-  //     };
-  //    }
+    //       return newCache;
+    //     }) 
+    //   };
+    //  };
 
-  //     //======================Infinity Scroll with Context==========================================
-  //     // setTransactions(prev => {
-  //     //   const newCache = prev
-  //     //   .concat(data)
-  //     //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  //     //   .slice(0, -1)
-  //     //   return newCache
-  //     // });
+      //======================Infinity Scroll with Context==========================================
+      setTransactions(prev => {
+        const newCache = prev
+        .concat(data)
+        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+        .slice(0, -1)
+        return newCache
+      });
 
-  //     //========================Infinity Scroll with Cache========================================
-  //     // for (let i = 1; i < pageNum; i += 1) {
-  //     //   console.log("hello", i);
-  //     //   queryClient.setQueryData(['transactions', i], []) 
-  //     // }
+      //========================Infinity Scroll with Cache========================================
+      // for (let i = 1; i < pageNum; i += 1) {
+      //   console.log("hello", i);
+      //   queryClient.setQueryData(['transactions', i], []) 
+      // }
 
-  //     // queryClient.setQueryData(['transactions', pageNum], () => {
-  //     //   const newCache = dataCacheTrans
-  //     //   .concat(data)
-  //     //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  //     //   .slice(0, -1)
-  //     //   return newCache
-  //     // })
-
-
-  //     //========== One Page Pagination + новые запросы==================
-  //     // queryClient.removeQueries({ queryKey: ["transactions"] });
+      // queryClient.setQueryData(['transactions', pageNum], () => {
+      //   const newCache = dataCacheTrans
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
+      //   return newCache
+      // })
 
 
-  //     //================================================================
-  //     // setPageNum(1);
-  //     // queryClient.removeQueries({ queryKey: ["transactions"] });
-  //   },
-  // });
+      //========== One Page Pagination + новые запросы==================
+      // queryClient.removeQueries({ queryKey: ["transactions"] });
 
-  const { mutate: createTransaction } = useCreateTransaction()
+
+      //================================================================
+      // setPageNum(1);
+      // queryClient.removeQueries({ queryKey: ["transactions"] });
+    },
+  });
 
   const mutation = useMutation({
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-
-      const lastPage = await getAllTransactions(pageNum)
+      const lastPage = await getAllTransactions(openedPage)
       const cutOffTrans = lastPage.pop();
 
-
-      queryClient.setQueryData(["transactions", 1], (prev) => {
+      setTransactions(prev => {
         const newCache = prev
         .filter(item => item._id !== data._id)
         .concat(cutOffTrans)
-        console.log("onSuccess:  newCache:", newCache);
+        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
         
-        return newCache;
-
         return newCache;
       });
-
-
-
-
-      
-      // setTransactions(prev => {
-      //   // console.log("onSuccess:  prev:", prev);
-        
-      //   const newCache = prev
-      //   .filter(item => item._id !== data._id)
-      //   .concat(cutOffTrans)
-      //   // console.log("onSuccess:  newCache:", newCache);
-        
-      //   return newCache;
-      // });
     },
       
       
@@ -212,25 +194,26 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     keepPreviousData: true,
 
     onSuccess: (data) => {
+      setOpenedPage(p => p + 1)
       setTransactions((prev) => [...prev, ...data]);
       // setTransactions(data);
     },
   });
 
-  // useEffect(() => {
-  //   if (!isPreviousData && todos) {
-  //     queryClient.prefetchQuery({
-  //       queryKey: ["transactions", pageNum + 1],
-  //       queryFn: () => getAllTransactions(pageNum + 1),
-  //     })
-  //   }
-  // }, [isPreviousData, pageNum, queryClient, todos])
+  
  
 
   //================================================================
   const fetchQuery = async () => {
-  
+
   };
+
+
+  const visibleTrans = useMemo(
+    () => getCurrentTransactions(pageNum, transactions),
+    [pageNum, transactions]
+  );
+
 
   const onDelete = (id) => {
     mutation.mutate(id)
@@ -245,7 +228,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   const onCreate = async (e) => {
     e.preventDefault();
-    createTransaction(credentials)
+    createTrans(credentials)
     // mutation.mutate(credentials);
   };
 
@@ -273,7 +256,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       </form>
       
       <ul>
-        {todos?.map((item) => {
+        {visibleTrans?.map((item) => {
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
             <li>{item.category}</li>
@@ -332,3 +315,12 @@ export default HomePage;
   //   },
   // });
 
+  //============================================================
+  // useEffect(() => {
+  //   if (!isPreviousData && todos) {
+  //     queryClient.prefetchQuery({
+  //       queryKey: ["transactions", pageNum + 1],
+  //       queryFn: () => getAllTransactions(pageNum + 1),
+  //     })
+  //   }
+  // }, [isPreviousData, pageNum, queryClient, todos])
