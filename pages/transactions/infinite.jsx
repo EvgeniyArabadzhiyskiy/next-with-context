@@ -28,8 +28,9 @@ const transData = {
 const InfinitePage = () => {
   const [credentials, setCredentials] = useState(transData);
   // const [clearTimeout, setClearTimeout] = useState();
-  const clearTO = useRef(null)
-  console.log("InfinitePage  clearTO:", clearTO.current);
+  const [isShowBtn, setIsShowBtn] = useState(true);
+  const timeID = useRef(null)
+
   
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
   
@@ -64,7 +65,10 @@ const InfinitePage = () => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      const lastPage = await getAllTransactions(pageNum - 1)
+      const PAGE_LIMIT = 5;
+      const lastPageNumber =  transactions.length / PAGE_LIMIT
+      
+      const lastPage = await getAllTransactions(lastPageNumber);
       const cutOffTrans = lastPage.pop();
       
       setTransactions(prev => {
@@ -96,9 +100,6 @@ const InfinitePage = () => {
         // cacheTime: 12000,
 
       onSuccess: (data) => {
-
-        setPageNum(prev => prev + 1)
-
         const currentIdx = data.pages.length - 1
         const currentPage = data.pages[currentIdx]
         
@@ -134,13 +135,20 @@ const InfinitePage = () => {
   };
 
   const onDelete = (id) => {
-    clearTO.current =  setTimeout(() => {
+    timeID.current = setTimeout(() => {
       removeTransaction(id);
-    }, 1000);
+      console.log("DELETE");
+    }, 2000);
 
-
-    
+    // setIsShowBtn(false)
   };
+
+  const onCancelDeletion = () => {
+    console.log('CANCEL');
+    clearTimeout(timeID.current)
+
+    // setIsShowBtn(true)
+  }
 
   return (
     <>
@@ -176,11 +184,14 @@ const InfinitePage = () => {
        
         {transactions?.map((item) => {
           return (
-          <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
-            <li style={{ height: "30px", fontSize: "20px" }} >
+          <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
+            <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
               {item.category}
             </li>
-              <button  type="button" onClick={() => onDelete(item._id)}> Delete</button>
+              {/* { isShowBtn  */}
+                <button  type="button" onClick={() => onDelete(item._id)}> Delete</button>
+                <button  type="button" onClick={() => onCancelDeletion()}> Cancel</button>
+              {/* } */}
           </div>
           );
         })}
