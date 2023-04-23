@@ -26,8 +26,8 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Sun Apr 09 2023 16:49:02 GMT+0300 (Восточная Европа, летнее время)",
-  // date: "Wed Apr 05 2023 21:40:45 GMT+0300 (Восточная Европа, летнее время)",
+  // date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:42:15 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -79,64 +79,78 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   // console.log("dataCacheTrans:", dataCacheTrans);
   // console.log("HomePage", queryClient.getQueriesData());
 
-  
+ 
 
-
-  
-  
   // const { mutate: createTrans } = useCreateTransaction()  // Custom Hook
 
   const { mutate: createTrans }  = useMutation({
     mutationFn: createTransaction,
 
     onSuccess: (data, variables) => {
+      // console.log("data:", data);
       //==================== One Page Pagination =====================================
+  
+      // let page = null;
+      // dataCacheTrans.reduce((acc,item) => {
+      //   const isOlder = Date.parse(item.date) > Date.parse(data.date)
 
-    //   let page = null;
-    //   const PAGE_LIMIT = 5;
-
-    //   dataCacheTrans.reduce((acc,item) => {
-    //     const isOlder = Date.parse(item.date) > Date.parse(data.date)
-
-    //     if (isOlder) {
-    //       acc += 1;
-    //     }
+      //   if (isOlder) {
+      //     acc += 1;
+      //   }
     
-    //     if (!isOlder) {
-    //       page = Math.ceil(acc/PAGE_LIMIT);
-    //     }
-    //     return acc;
+      //   if (!isOlder) {
+      //     page = Math.ceil(acc/PAGE_LIMIT);
+      //   }
+      //   return acc;
         
-    //   },1);
-      
-    //   const dataLength = queryClient.getQueriesData(["transactions"]).length;
-    //   let newData = data;
-    
-    //  if (page) {
-    //   for (let i = page; i <= dataLength; i += 1) {
-    //     // console.log("hello", i);
-    //     queryClient.setQueryData(['transactions', i], (prev) => {
-    //       const newCache  = prev
-    //       .concat(newData)
-    //       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-    //       .slice(0, -1);
-          
-    //       newData = prev.pop();
+      // },1);
 
-    //       return newCache;
-    //     }) 
-    //   };
-    //  };
+      const PAGE_LIMIT = 5;
+      const page = Math.ceil(data.position/PAGE_LIMIT);
+      
+      const queryLength = queryClient.getQueriesData(["transactions"]).length;
+      let newData = data;
+    
+    
+     if (page) {
+      for (let i = page; i <= queryLength; i += 1) {
+        // const cachedData = queryClient.getQueryData(["transactions", i]);
+
+        // if (cachedData) {
+        //   const newCache = cachedData
+        //     .concat(newData)
+        //     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+        //     .slice(0, -1);
+             
+        //   newData = cachedData.pop();
+
+        //   queryClient.setQueryData(["transactions", i], newCache);
+        // }
+        
+        queryClient.setQueryData(["transactions", i], (prev) => {
+          if (prev) {
+            const newCache = prev
+              .concat(newData)
+              .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+              .slice(0, -1);
+              
+            newData = prev.pop();
+              
+            return newCache;
+          }
+        }); 
+      };
+     };
 
       //======================Infinity Scroll with Context==========================================
-      setTransactions(prev => {
-        const newCache = prev
-        .concat(data)
-        .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-        .slice(0, -1)
+      // setTransactions(prev => {
+      //   const newCache = prev
+      //   .concat(data)
+      //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+      //   .slice(0, -1)
         
-        return newCache
-      });
+      //   return newCache
+      // });
 
       //========================Infinity Scroll with Cache========================================
       // for (let i = 1; i < pageNum; i += 1) {
@@ -162,6 +176,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       // queryClient.removeQueries({ queryKey: ["transactions"] });
     },
   });
+   
 
   const mutation = useMutation({
     mutationFn: deleteTransaction,
@@ -172,14 +187,37 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
       const lastPage = await getAllTransactions(lastPageNumber)
       const cutOffTrans = lastPage.pop();
+      console.log("onSuccess:  cutOffTrans:", cutOffTrans);
 
-      setTransactions(prev => {
-        const newCache = prev
-        .filter(item => item._id !== data._id)
-        .concat(cutOffTrans);
+      // setTransactions(prev => {
+      //   const newCache = prev
+      //   .filter(item => item._id !== data._id)
+      //   .concat(cutOffTrans);
         
-        return newCache;
-      });
+      //   return newCache;
+      // });
+
+      const prevDataCache = null
+
+      for (let i = 4; i > 2; i -= 1) {
+        // console.log("queryClient.setQueryData  i:", i);
+
+        queryClient.setQueryData(['transactions', i], (prev) => {
+
+          const newCache = prev
+          // console.log("queryClient.setQueryData  newCache:", newCache);
+          
+          return newCache
+        })
+        
+      }
+
+
+      
+
+
+
+
     },
       
       
@@ -201,8 +239,6 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     },
   });
 
-  
- 
 
   //================================================================
   const fetchQuery = async () => {
@@ -257,7 +293,8 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       </form>
       
       <ul>
-        {visibleTrans?.map((item) => {
+        {/* {visibleTrans?.map((item) => { */}
+        {todos?.map((item) => {
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
             <li>{item.category}</li>
@@ -325,3 +362,96 @@ export default HomePage;
   //     })
   //   }
   // }, [isPreviousData, pageNum, queryClient, todos])
+
+
+
+
+//================================BIG O Log==============================
+// const transaction = 67;
+// // const allTransactions = [1, 2, 3, 67, 4, 5, 12, 41, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 214, 85];
+// const numbersString = [1, 2, 3, 67, 4, 5, 41, 6, 7, 8, 9, 6, 10, 11, 12,5, 6, 13, 14, 15, 214, 1, 85].map(i => i.toString())
+// console.log("numbers:", numbers);
+// const sortNum = numbers.sort((a, b) => a - b); 
+// // console.log("sortNum:", sortNum);
+
+// function binarySearch(arr, target) {
+//   let left = 0;
+//   let right = arr.length - 1;
+
+//   while (left <= right) {
+//     const mid = Math.floor((left + right) / 2);
+//     // console.log("binarySearch  mid:", mid);
+    
+//     const cmp = target.toString().localeCompare(arr[mid].toString());
+//     // console.log("binarySearch  cmp:", cmp);
+
+//     if (cmp === 0) {
+//       return mid;
+//     } else if (cmp < 0) {
+//       right = mid - 1;
+//     } else {
+//       left = mid + 1;
+//     }
+//   }
+
+//   return -1;
+// }
+
+// const indexNewTransaction = binarySearch(sortNum, transaction);
+// console.log("indexNewTransaction:", indexNewTransaction);
+
+
+
+
+// console.log(  star);
+
+
+
+
+
+
+
+
+
+
+function binarySearch(array, targetValue) {
+  const arr = array.slice().sort();
+  let left = 0;
+  let right = arr.length - 1;
+
+  while (left <= right) {
+    const mid = Math.floor((left + right) / 2);
+    const cmp = targetValue.localeCompare(arr[mid]);
+
+    if (cmp === 0) {
+      // Если значение найдено, необходимо найти его индекс в исходном массиве
+      const index = array.findIndex((value) => value === arr[mid]);
+      return index;
+    } else if (cmp < 0) {
+      right = mid - 1;
+    } else {
+      left = mid + 1;
+    }
+  }
+
+  return -1;
+}
+
+const targetValue = '41';
+const numbersString = ['1', '2', '3', '4', '214', '5', '6', '6', '7', '8', '9', '10','1', '11', '12', '13', '14', '15','7', '41', '67', '85', '214'].sort((a,b) => a-b);
+
+
+
+
+
+// const index = binarySearch(numbersString, targetValue);
+
+// if (index === -1) {
+//   console.log(`Значение ${targetValue} не найдено в массиве`);
+// } else {
+//   console.log(`Значение ${targetValue} найдено в массиве, индекс: ${index}`);
+// }
+
+
+
+
