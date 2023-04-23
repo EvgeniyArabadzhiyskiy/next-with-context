@@ -7,6 +7,7 @@ import { HomeContext } from "@/components/Context";
 import { createTransaction } from "@/helpers/createTransaction";
 import { useCreateTransactionInfinity } from "@/hooks/useCreateTransactionInfinity";
 import { deleteTransaction } from "@/helpers/deleteTransaction";
+import ContexMenu from "@/components/ContexMenu";
 
 const getPokemonsList = async (
   page = "https://pokeapi.co/api/v2/pokemon?offset=0&limit=10"
@@ -27,9 +28,9 @@ const transData = {
 
 const InfinitePage = () => {
   const [credentials, setCredentials] = useState(transData);
-  // const [clearTimeout, setClearTimeout] = useState();
-  const [isShowBtn, setIsShowBtn] = useState(true);
   const timeID = useRef(null)
+
+  const [activIdx, setActivIdx] = useState(null);
 
   
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
@@ -78,6 +79,8 @@ const InfinitePage = () => {
         
         return newCache;
       });
+
+      setActivIdx(null);
     },
       
   });
@@ -136,19 +139,25 @@ const InfinitePage = () => {
 
   const onDelete = (id) => {
     timeID.current = setTimeout(() => {
-      removeTransaction(id);
-      console.log("DELETE");
+    removeTransaction(id);
+    console.log("DELETE");
     }, 2000);
-
-    // setIsShowBtn(false)
   };
 
   const onCancelDeletion = () => {
     console.log('CANCEL');
-    clearTimeout(timeID.current)
+    clearTimeout(timeID.current);
+  };
 
-    // setIsShowBtn(true)
-  }
+  const onClose= (idx) => {
+    // setActivIdx(p => p.filter(item => item !== idx));
+    setActivIdx(idx);
+  };
+
+  const onOpen= (idx) => {
+    setActivIdx(idx);
+    // setActivIdx(p => [...p, idx]);
+  };
 
   return (
     <>
@@ -182,16 +191,51 @@ const InfinitePage = () => {
 
       <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
        
-        {transactions?.map((item) => {
+        {transactions?.map((item, idx) => {
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
+            <button type="button" onClick={() => onOpen(idx)}>Open</button>
+
             <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
               {item.category}
             </li>
-              {/* { isShowBtn  */}
-                <button  type="button" onClick={() => onDelete(item._id)}> Delete</button>
-                <button  type="button" onClick={() => onCancelDeletion()}> Cancel</button>
-              {/* } */}
+
+            {/* {activIdx.find((i, filterIdx) => {
+              console.log("{activIdx.filter  item:", i === idx);
+
+              if (i === idx) {
+                return true
+              }
+            
+            })  && <ContexMenu 
+            activ={activIdx === idx}
+            onClose={() => onClose(null)}
+            onDelete={() => onDelete(item._id)}
+            onCancelDeletion={() => onCancelDeletion()}
+            /> } */}
+            
+
+            { activIdx === idx && 
+              <ContexMenu 
+                activ={activIdx === idx}
+                onClose={() => onClose(null)}
+                onDelete={() => onDelete(item._id)}
+                onCancelDeletion={() => onCancelDeletion()}
+              />
+            }
+
+          {/* {activIdx === idx && 
+          <div style={{backgroundColor: activIdx === idx ? "red" : "blue"}}>
+            <button type="button" onClick={() => onClose(null)}>Close</button>
+            <button  type="button" onClick={() => onDelete(item._id)}>Delete</button>
+            <button  type="button" onClick={() => onCancelDeletion()}>Cancel</button>
+          </div>} */}
+              
+            
+
+            {/* <button  type="button" onClick={() => onDelete(item._id)}>Delete</button>
+            <button  type="button" onClick={() => onCancelDeletion()}>Cancel</button> */}
+             
           </div>
           );
         })}
