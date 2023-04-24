@@ -27,7 +27,7 @@ const transData = {
   typeOperation: "expense",
   comment: "Fruits",
   // date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
-  date: "Wed Apr 05 2023 21:42:15 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -108,12 +108,19 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       const PAGE_LIMIT = 5;
       const page = Math.ceil(data.position/PAGE_LIMIT);
       
+      
       const queryLength = queryClient.getQueriesData(["transactions"]).length;
       let newData = data;
+      // console.log("newData:", newData);
+      
+      // console.log("Page:", page);
+      // console.log("Position:", data.position);
+      // console.log("Length:", queryLength);
     
     
      if (page) {
       for (let i = page; i <= queryLength; i += 1) {
+        // console.log("i:", i);
         // const cachedData = queryClient.getQueryData(["transactions", i]);
 
         // if (cachedData) {
@@ -126,20 +133,28 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
         //   queryClient.setQueryData(["transactions", i], newCache);
         // }
+
         
         queryClient.setQueryData(["transactions", i], (prev) => {
           if (prev) {
-            const newCache = prev
-              .concat(newData)
+            const newCache = [newData, ...prev]
               .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
               .slice(0, -1);
               
+
             newData = prev.pop();
               
             return newCache;
           }
         }); 
+
       };
+
+      const cachedDat = queryClient.getQueriesData(["transactions"]);
+      // console.log("cachedData:", cachedDat);
+      
+      // const cachedData = queryClient.getQueryData(["transactions", 2]);
+      // console.log("cachedData:", cachedData);
      };
 
       //======================Infinity Scroll with Context==========================================
@@ -182,40 +197,45 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      const PAGE_LIMIT = 5;
-      const lastPageNumber =  transactions.length / PAGE_LIMIT;
+      // const PAGE_LIMIT = 5;
+      // const lastPageNumber =  transactions.length / PAGE_LIMIT;
+      
+      const queryLength = queryClient.getQueriesData(["transactions"]).length;
 
-      const lastPage = await getAllTransactions(lastPageNumber)
+      const lastPage = await getAllTransactions(queryLength)
       const cutOffTrans = lastPage.pop();
-      console.log("onSuccess:  cutOffTrans:", cutOffTrans);
 
-      // setTransactions(prev => {
+      setTransactions(prev => {
+        const newCache = prev
+        .filter(item => item._id !== data._id)
+        .concat(cutOffTrans);
+        
+        return newCache;
+      });
+      //=============================================================
+      // let prevDataCache = cutOffTrans
+  
+      // for (let i = queryLength; i > pageNum; i -= 1) {
+
+      //   queryClient.setQueryData(['transactions', i], (prev) => {
+      //     const newCache = prev
+      //     .concat(prevDataCache)
+
+      //     prevDataCache = newCache.shift()
+      //     // console.log("queryClient.setQueryData  newCache:", newCache);
+          
+      //     return newCache
+      //   })
+        
+      // };
+
+      // queryClient.setQueryData(['transactions', pageNum], (prev) => {
       //   const newCache = prev
       //   .filter(item => item._id !== data._id)
-      //   .concat(cutOffTrans);
-        
-      //   return newCache;
+      //   .concat(prevDataCache);
+      //   // console.log("queryClient.setQueryData  newCache:", newCache);
+      //   return newCache
       // });
-
-      const prevDataCache = null
-
-      for (let i = 4; i > 2; i -= 1) {
-        // console.log("queryClient.setQueryData  i:", i);
-
-        queryClient.setQueryData(['transactions', i], (prev) => {
-
-          const newCache = prev
-          // console.log("queryClient.setQueryData  newCache:", newCache);
-          
-          return newCache
-        })
-        
-      }
-
-
-      
-
-
 
 
     },
@@ -293,8 +313,8 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       </form>
       
       <ul>
-        {/* {visibleTrans?.map((item) => { */}
         {todos?.map((item) => {
+        {/* {transactions?.map((item) => { */}
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '200px'}} key={item._id}>
             <li>{item.category}</li>
