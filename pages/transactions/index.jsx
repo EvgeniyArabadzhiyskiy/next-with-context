@@ -26,8 +26,8 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  // date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
-  date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
+  // date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -108,19 +108,12 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       const PAGE_LIMIT = 5;
       const page = Math.ceil(data.position/PAGE_LIMIT);
       
-      
       const queryLength = queryClient.getQueriesData(["transactions"]).length;
       let newData = data;
-      // console.log("newData:", newData);
-      
-      // console.log("Page:", page);
-      // console.log("Position:", data.position);
-      // console.log("Length:", queryLength);
     
     
      if (page) {
       for (let i = page; i <= queryLength; i += 1) {
-        // console.log("i:", i);
         // const cachedData = queryClient.getQueryData(["transactions", i]);
 
         // if (cachedData) {
@@ -134,20 +127,17 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
         //   queryClient.setQueryData(["transactions", i], newCache);
         // }
 
-        
         queryClient.setQueryData(["transactions", i], (prev) => {
           if (prev) {
             const newCache = [newData, ...prev]
               .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
               .slice(0, -1);
               
-
             newData = prev.pop();
               
             return newCache;
           }
         }); 
-
       };
 
       const cachedDat = queryClient.getQueriesData(["transactions"]);
