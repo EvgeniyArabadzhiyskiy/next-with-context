@@ -26,8 +26,8 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
-  // date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
+  // date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -111,14 +111,13 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
       const queryLength = queryClient.getQueriesData(["transactions"]).length;
       let newData = data;
     
-    
-     if (page) {
+      if (!page)  return
+      
       for (let i = page; i <= queryLength; i += 1) {
         // const cachedData = queryClient.getQueryData(["transactions", i]);
 
         // if (cachedData) {
-        //   const newCache = cachedData
-        //     .concat(newData)
+        //   const newCache = [cachedData, ...prev]
         //     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
         //     .slice(0, -1);
              
@@ -139,13 +138,6 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
           }
         }); 
       };
-
-      const cachedDat = queryClient.getQueriesData(["transactions"]);
-      // console.log("cachedData:", cachedDat);
-      
-      // const cachedData = queryClient.getQueryData(["transactions", 2]);
-      // console.log("cachedData:", cachedData);
-     };
 
       //======================Infinity Scroll with Context==========================================
       // setTransactions(prev => {
@@ -187,50 +179,39 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      // const PAGE_LIMIT = 5;
-      // const lastPageNumber =  transactions.length / PAGE_LIMIT;
-      
       const queryLength = queryClient.getQueriesData(["transactions"]).length;
 
       const lastPage = await getAllTransactions(queryLength)
       const cutOffTrans = lastPage.pop();
 
-      setTransactions(prev => {
-        const newCache = prev
-        .filter(item => item._id !== data._id)
-        .concat(cutOffTrans);
-        
-        return newCache;
-      });
-      //=============================================================
-      // let prevDataCache = cutOffTrans
-  
-      // for (let i = queryLength; i > pageNum; i -= 1) {
-
-      //   queryClient.setQueryData(['transactions', i], (prev) => {
-      //     const newCache = prev
-      //     .concat(prevDataCache)
-
-      //     prevDataCache = newCache.shift()
-      //     // console.log("queryClient.setQueryData  newCache:", newCache);
-          
-      //     return newCache
-      //   })
-        
-      // };
-
-      // queryClient.setQueryData(['transactions', pageNum], (prev) => {
+      // setTransactions(prev => {
       //   const newCache = prev
       //   .filter(item => item._id !== data._id)
-      //   .concat(prevDataCache);
-      //   // console.log("queryClient.setQueryData  newCache:", newCache);
-      //   return newCache
+      //   .concat(cutOffTrans);
+        
+      //   return newCache;
       // });
+      //=============================================================
+      let prevDataCache = cutOffTrans;
+  
+      for (let i = queryLength; i > pageNum; i -= 1) {
 
+        queryClient.setQueryData(['transactions', i], (prev) => {
+          const newCache = prev.concat(prevDataCache);
 
+          prevDataCache = newCache.shift();
+          
+          return newCache;
+        });
+      };
+
+      queryClient.setQueryData(['transactions', pageNum], (prev) => {
+        const newCache = prev
+        .filter(item => item._id !== data._id)
+        .concat(prevDataCache);
+        return newCache;
+      });
     },
-      
-      
   });
 
 
