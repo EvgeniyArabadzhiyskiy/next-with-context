@@ -22,7 +22,8 @@ const transData = {
   category: "WODA",
   typeOperation: "expense",
   comment: "Fruits",
-  date: "Sun Apr 09 2023 16:49:02 GMT+0300 (Восточная Европа, летнее время)",
+  // date: "Sun Apr 09 2023 16:49:02 GMT+0300 (Восточная Европа, летнее время)",
+  date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
@@ -66,26 +67,113 @@ const InfinitePage = () => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      const PAGE_LIMIT = 5;
-      const lastPageNumber =  transactions.length / PAGE_LIMIT
+      const dataInfinity = queryClient.getQueriesData(["transactionsList"]);
+      const allPages = dataInfinity[0][1].pages;
+      const lastPageNumber = allPages.length;
+
+      const lastPageData = await getAllTransactions(lastPageNumber);
+      const lastTransaction = lastPageData.pop();
+
+      let pageIdx = null
+      let prevDataCache = lastTransaction;
+      const newCacheQuery = [];
       
-      const lastPage = await getAllTransactions(lastPageNumber);
-      const cutOffTrans = lastPage.pop();
-      
-      setTransactions(prev => {
-        const newCache = prev
-        .filter(item => item._id !== data._id)
-        .concat(cutOffTrans)
+      for (let i = 0; i < allPages.length; i += 1) {
+        const page = allPages[i];
+        const removeTransaction = page.find(item => item._id === data._id);
         
-        return newCache;
+        if (removeTransaction) {
+          pageIdx = i;
+        };  
+      };
+
+      for (let i = lastPageNumber - 1; i >= 0; i -= 1) {
+        const page = allPages[i];
+    
+        if (i > pageIdx) {
+          const newCache = page.concat(prevDataCache);
+
+          prevDataCache = newCache.shift();
+          newCacheQuery.push(newCache);
+        };
+
+        if (i === pageIdx) {
+          const newCache = page
+            .filter(item => item._id !== data._id)
+            .concat(prevDataCache);
+
+          newCacheQuery.push(newCache);
+        }; 
+
+        if (i < pageIdx) {
+          newCacheQuery.push(page);
+        };
+
+      };
+ 
+      queryClient.setQueryData(['transactionsList'], (prev) => {
+        return{
+          ...prev,
+          pages: newCacheQuery.reverse(),
+        }
       });
 
-      setActivIdx(null);
+
+      // const PAGE_LIMIT = 5;
+      // const lastPageNumber =  transactions.length / PAGE_LIMIT
+      
+      // setTransactions(prev => {
+      //   const newCache = prev
+      //   .filter(item => item._id !== data._id)
+      //   .concat(lastTransaction)
+        
+      //   return newCache;
+      // });
+
+      // setActivIdx(null);
     },
       
   });
 
-  const { mutate: createTransaction } = useCreateTransactionInfinity(setTransactions)
+ 
+  
+  
+   
+
+  // const { mutate: createTrans } = useCreateTransactionInfinity(setTransactions);
+
+  const { mutate: createTrans }  = useMutation({
+    mutationFn: createTransaction,
+
+    onSuccess: (data) => {
+
+      const dataInfinity = queryClient.getQueriesData(["transactionsList"]);
+      const allPages = dataInfinity[0][1].pages;
+      
+      let newData = data;
+      const newCacheQuery = [];
+
+      for (let i = 0; i < allPages.length; i += 1) {
+        const page = allPages[i];
+
+        const newCache = [newData, ...page]
+          .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+        newData = newCache.pop();  
+
+        newCacheQuery.push(newCache);
+      };
+      
+      queryClient.setQueryData(['transactionsList'], (prev) => {
+        return {
+          ...prev,
+          pages: newCacheQuery,
+        }
+        
+      });
+    }, 
+
+  });
 
 
   const { data, fetchNextPage, hasNextPage, isFetchingNextPage } =
@@ -102,16 +190,22 @@ const InfinitePage = () => {
         // staleTime: 100000,
         // cacheTime: 12000,
 
+      select: (data) => data.pages.flat(),
+
       onSuccess: (data) => {
-        const currentIdx = data.pages.length - 1
-        const currentPage = data.pages[currentIdx]
+        // const currentIdx = data.pages.length - 1
+        // const currentPage = data.pages[currentIdx]
         
-        setTransactions((prev) => [...prev, ...currentPage]);
+        // setTransactions((prev) => [...prev, ...currentPage]);
         // setTransactions(data.pages.flat());
         // setTransactions(data);
       },
-    });
 
+      
+    });
+      
+
+    // console.log("data:", data);
    
   const observerElem = useRef(null);  
  
@@ -134,14 +228,15 @@ const InfinitePage = () => {
 
   const onCreate = async (e) => {
     e.preventDefault();
-    createTransaction(credentials);
+    createTrans(credentials);
   };
 
   const onDelete = (id) => {
+    
     timeID.current = setTimeout(() => {
     removeTransaction(id);
     console.log("DELETE");
-    }, 2000);
+    }, 100);
   };
 
   const onCancelDeletion = () => {
@@ -173,7 +268,7 @@ const InfinitePage = () => {
       </form>
 
       {/* <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
-        {transactions?.pages.map((group) => {
+        {data?.pages.map((group) => {
           return group.map((item) => {
             return (
               <li style={{ height: "30px", fontSize: "20px" }} key={item._id}>
@@ -191,7 +286,7 @@ const InfinitePage = () => {
 
       <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
        
-        {transactions?.map((item, idx) => {
+        {data?.map((item, idx) => {
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
             <button type="button" onClick={() => onOpen(idx)}>Open</button>
@@ -199,21 +294,6 @@ const InfinitePage = () => {
             <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
               {item.category}
             </li>
-
-            {/* {activIdx.find((i, filterIdx) => {
-              console.log("{activIdx.filter  item:", i === idx);
-
-              if (i === idx) {
-                return true
-              }
-            
-            })  && <ContexMenu 
-            activ={activIdx === idx}
-            onClose={() => onClose(null)}
-            onDelete={() => onDelete(item._id)}
-            onCancelDeletion={() => onCancelDeletion()}
-            /> } */}
-            
 
             { activIdx === idx && 
               <ContexMenu 
@@ -223,19 +303,7 @@ const InfinitePage = () => {
                 onCancelDeletion={() => onCancelDeletion()}
               />
             }
-
-          {/* {activIdx === idx && 
-          <div style={{backgroundColor: activIdx === idx ? "red" : "blue"}}>
-            <button type="button" onClick={() => onClose(null)}>Close</button>
-            <button  type="button" onClick={() => onDelete(item._id)}>Delete</button>
-            <button  type="button" onClick={() => onCancelDeletion()}>Cancel</button>
-          </div>} */}
-              
-            
-
-            {/* <button  type="button" onClick={() => onDelete(item._id)}>Delete</button>
-            <button  type="button" onClick={() => onCancelDeletion()}>Cancel</button> */}
-             
+ 
           </div>
           );
         })}
