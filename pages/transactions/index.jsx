@@ -16,6 +16,7 @@ import { useCreateTransaction } from "@/hooks/useCreateTransaction";
 import { updateCacheTransaction } from "@/helpers/updateCacheTransaction";
 import { deleteTransaction } from "@/helpers/deleteTransaction";
 import { getCurrentTransactions } from "@/helpers/getCurrentTransactions";
+import { useRouter } from "next/router";
 
 // const operationDate = 
 // moment(new Date("Thu Apr 06 2023 08:42:34 GMT+0300 (Восточная Европа, летнее время)"))
@@ -58,6 +59,10 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   // console.log("HomePage  initialData:", initialData);
   // console.log("HomePage  dehydratedState:", dehydratedState.queries[0].state.data);
   const queryClient = useQueryClient();
+
+  const router = useRouter();
+  console.log(router.query.query);
+  
 
 
   const [isSkip, setIsSkip] = useState(false);
@@ -113,38 +118,27 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     
       if (!page)  return
       
-      for (let i = 1; i <= queryLength; i += 1) {
+      for (let i = page; i <= queryLength; i += 1) {
+        queryClient.setQueryData(["transactions", i], (prev) => {
+          if (prev) {
+            const newCache = [newData, ...prev]
+              .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+              
+            newData = newCache.pop();
+            return  newCache;
+          }
+        }); 
+
         // const cachedData = queryClient.getQueryData(["transactions", i]);
 
         // if (cachedData) {
-        //   const newCache = [cachedData, ...prev]
+        //   const newCache = [newData, ...cachedData]
         //     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-        //     .slice(0, -1);
              
-        //   newData = cachedData.pop();
+        //   newData = newCache.pop();
 
         //   queryClient.setQueryData(["transactions", i], newCache);
         // }
-
-        queryClient.setQueryData(["transactions", i], (prev) => {
-          if (prev) {
-            // const newCache = [newData, ...prev]
-            //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-            //   .slice(0, -1);
-              
-            // newData = prev.pop();
-              
-            // return newCache;
-
-            const ooo = [newData, ...prev]
-              .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-              // .slice(0, -1);
-              console.log("queryClient.setQueryData  ooo:", ooo);
-              
-              
-            newData = ooo.pop();
-          }
-        }); 
       };
 
       //======================Infinity Scroll with Context==========================================
@@ -241,7 +235,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
   //================================================================
   const fetchQuery = async () => {
-
+    router.push('/transactions?query=cat')
   };
 
 
