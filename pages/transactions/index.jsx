@@ -113,7 +113,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     
       if (!page)  return
       
-      for (let i = page; i <= queryLength; i += 1) {
+      for (let i = 1; i <= queryLength; i += 1) {
         // const cachedData = queryClient.getQueryData(["transactions", i]);
 
         // if (cachedData) {
@@ -128,13 +128,21 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
         queryClient.setQueryData(["transactions", i], (prev) => {
           if (prev) {
-            const newCache = [newData, ...prev]
+            // const newCache = [newData, ...prev]
+            //   .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+            //   .slice(0, -1);
+              
+            // newData = prev.pop();
+              
+            // return newCache;
+
+            const ooo = [newData, ...prev]
               .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-              .slice(0, -1);
+              // .slice(0, -1);
+              console.log("queryClient.setQueryData  ooo:", ooo);
               
-            newData = prev.pop();
               
-            return newCache;
+            newData = ooo.pop();
           }
         }); 
       };
