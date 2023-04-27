@@ -31,7 +31,8 @@ const InfinitePage = () => {
   const [credentials, setCredentials] = useState(transData);
   const timeID = useRef(null)
 
-  const [activIdx, setActivIdx] = useState(null);
+  const [activIdx, setActivIdx] = useState([]);
+  // console.log("InfinitePage  activIdx:", activIdx);
 
   
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
@@ -244,14 +245,18 @@ const InfinitePage = () => {
     clearTimeout(timeID.current);
   };
 
-  const onClose= (idx) => {
-    // setActivIdx(p => p.filter(item => item !== idx));
-    setActivIdx(idx);
+  const onClose= (id) => {
+    setActivIdx(p => p.filter(item => item !== id));
+    // setActivIdx(id);
   };
 
-  const onOpen= (idx) => {
-    setActivIdx(idx);
-    // setActivIdx(p => [...p, idx]);
+  const onOpen= (id) => {
+    // setActivIdx(id);
+    setActivIdx(p => [...p, id]);
+  };
+
+  const visibleMenu = (id) => {
+    return activIdx.includes(id);
   };
 
   return (
@@ -289,20 +294,29 @@ const InfinitePage = () => {
         {data?.map((item, idx) => {
           return (
           <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
-            <button type="button" onClick={() => onOpen(idx)}>Open</button>
+            <button type="button" onClick={() => onOpen(item._id)}>Open</button>
 
             <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
               {item.category}
             </li>
 
-            { activIdx === idx && 
+            { visibleMenu(item._id) && 
               <ContexMenu 
-                activ={activIdx === idx}
-                onClose={() => onClose(null)}
+                activ={activIdx === item._id}
+                onClose={() => onClose(item._id)}
                 onDelete={() => onDelete(item._id)}
                 onCancelDeletion={() => onCancelDeletion()}
               />
             }
+
+            {/* { activIdx === item._id && 
+              <ContexMenu 
+                activ={activIdx === item._id}
+                onClose={() => onClose(null)}
+                onDelete={() => onDelete(item._id)}
+                onCancelDeletion={() => onCancelDeletion()}
+              />
+            } */}
  
           </div>
           );
