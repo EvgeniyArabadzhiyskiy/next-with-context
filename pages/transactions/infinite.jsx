@@ -127,13 +127,10 @@ const InfinitePage = () => {
       queryClient.setQueryData(['transactionsList'], (prev) => {
         return{
           ...prev,
-          pages: updatedPages,
-          // pages: newCacheQuery.reverse(),
+          
+          pages: newCacheQuery.reverse(),
         }
       });
-
-      
-
 
       // const PAGE_LIMIT = 5;
       // const lastPageNumber =  transactions.length / PAGE_LIMIT
@@ -162,28 +159,42 @@ const InfinitePage = () => {
     mutationFn: createTransaction,
 
     onSuccess: (data) => {
+      // const { pages } = queryClient.getQueryData(['transactionsList']);
+      // console.log("InfinitePage  pages:", pages);
 
-      const dataInfinity = queryClient.getQueriesData(["transactionsList"]);
-      const allPages = dataInfinity[0][1].pages;
       
+      
+      // let newData = data;
+      // const newCacheQuery = [];
+
+      // for (let i = 0; i < pages.length; i += 1) {
+      //   const page = pages[i];
+
+      //   const newCache = [newData, ...page]
+      //     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+      //   newData = newCache.pop();  
+
+      //   newCacheQuery.push(newCache);
+      // };
+
       let newData = data;
-      const newCacheQuery = [];
-
-      for (let i = 0; i < allPages.length; i += 1) {
-        const page = allPages[i];
-
-        const newCache = [newData, ...page]
-          .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-        newData = newCache.pop();  
-
-        newCacheQuery.push(newCache);
-      };
       
       queryClient.setQueryData(['transactionsList'], (prev) => {
+
+        const updatedPages = prev.pages.map((page) => {
+          const newCache = [newData, ...page]
+            .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+          newData = newCache.pop();
+          return newCache
+        });
+
+        
         return {
           ...prev,
-          pages: newCacheQuery,
+          // pages: newCacheQuery,
+          pages: updatedPages,
         }
         
       });
