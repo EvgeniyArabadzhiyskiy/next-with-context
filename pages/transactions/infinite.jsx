@@ -68,19 +68,31 @@ const InfinitePage = () => {
     mutationFn: deleteTransaction,
 
     onSuccess: async (data) => {
-      const dataInfinity = queryClient.getQueriesData(["transactionsList"]);
-      const allPages = dataInfinity[0][1].pages;
-      const lastPageNumber = allPages.length;
-
+      const { pages } = queryClient.getQueryData(['transactionsList']);
+      const lastPageNumber = pages.length;
+      
       const lastPageData = await getAllTransactions(lastPageNumber);
       const lastTransaction = lastPageData.pop();
+      
+      
+      //========================================================================
+    
+      const updatedPages = pages.map((page) =>
+        page.filter(item => item._id !== data._id)
+      );
+      
+      const lastPagesIdx = updatedPages.length - 1
+      updatedPages[lastPagesIdx].push(lastTransaction);
+
+
+      //=======================================================================
 
       let pageIdx = null
       let prevDataCache = lastTransaction;
       const newCacheQuery = [];
       
-      for (let i = 0; i < allPages.length; i += 1) {
-        const page = allPages[i];
+      for (let i = 0; i < pages.length; i += 1) {
+        const page = pages[i];
         const removeTransaction = page.find(item => item._id === data._id);
         
         if (removeTransaction) {
@@ -89,7 +101,7 @@ const InfinitePage = () => {
       };
 
       for (let i = lastPageNumber - 1; i >= 0; i -= 1) {
-        const page = allPages[i];
+        const page = pages[i];
     
         if (i > pageIdx) {
           const newCache = page.concat(prevDataCache);
@@ -115,9 +127,12 @@ const InfinitePage = () => {
       queryClient.setQueryData(['transactionsList'], (prev) => {
         return{
           ...prev,
-          pages: newCacheQuery.reverse(),
+          pages: updatedPages,
+          // pages: newCacheQuery.reverse(),
         }
       });
+
+      
 
 
       // const PAGE_LIMIT = 5;
@@ -191,9 +206,10 @@ const InfinitePage = () => {
         // staleTime: 100000,
         // cacheTime: 12000,
 
-      select: (data) => data.pages.flat(),
+      select: (data) =>  data.pages.flat(),
 
       onSuccess: (data) => {
+        
         // const currentIdx = data.pages.length - 1
         // const currentPage = data.pages[currentIdx]
         
@@ -204,6 +220,8 @@ const InfinitePage = () => {
 
       
     });
+      
+      
       
 
     // console.log("data:", data);
@@ -309,15 +327,6 @@ const InfinitePage = () => {
               />
             }
 
-            {/* { activIdx === item._id && 
-              <ContexMenu 
-                activ={activIdx === item._id}
-                onClose={() => onClose(null)}
-                onDelete={() => onDelete(item._id)}
-                onCancelDeletion={() => onCancelDeletion()}
-              />
-            } */}
- 
           </div>
           );
         })}
