@@ -218,7 +218,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
 
 
   const { isLoading, data: todos, isPreviousData } = useQuery({
-    queryKey: ["transactions", pageNum],
+    queryKey: ["transactionsList"],
     queryFn: () => getAllTransactions(pageNum),
     // enabled: isSkip,
     // refetchOnWindowFocus: false,
@@ -226,11 +226,14 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     staleTime: Infinity,
     keepPreviousData: true,
 
+    select: (data) =>  data.pages.flat(),
+
     onSuccess: (data) => {
-      setTransactions((prev) => [...prev, ...data]);
+      // setTransactions((prev) => [...prev, ...data]);
       // setTransactions(data);
     },
   });
+  console.log("todos:", todos);
 
 
   //================================================================
