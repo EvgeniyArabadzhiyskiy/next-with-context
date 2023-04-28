@@ -28,42 +28,17 @@ const transData = {
 };
 
 const InfinitePage = () => {
-  const [credentials, setCredentials] = useState(transData);
   const timeID = useRef(null)
+  const queryClient = useQueryClient();
 
   const [activIdx, setActivIdx] = useState([]);
-  // console.log("InfinitePage  activIdx:", activIdx);
+  const [credentials, setCredentials] = useState(transData);
 
   
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
   
-  const queryClient = useQueryClient();
-  // console.log("HomePage", queryClient.getQueriesData());
   
-  // const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
-  //   useInfiniteQuery({
-  //     queryKey: ["pokemonList"],
-  //     queryFn: ({ pageParam }) => getPokemonsList(pageParam),
-  //     getNextPageParam: (lastPage) => lastPage.nextPage,
-  //   });
-
-
-  // const mutation = useMutation({
-  //   mutationFn: createTransaction,
-
-  //   onSuccess: (data) => {
-  //     setTransactions(prev => {
-  //       const newCache = prev
-  //       .concat(data)
-  //       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
-  //       .slice(0, -1);
-
-  //       return newCache;
-  //     });
-  //   },
-      
-  // });
-
+  
   const { mutate: removeTransaction } = useMutation({
     mutationFn: deleteTransaction,
 
@@ -74,9 +49,6 @@ const InfinitePage = () => {
       const lastPageData = await getAllTransactions(lastPageNumber);
       const lastTransaction = lastPageData.pop();
       
-      
-      //========================================================================
-    
       const updatedPages = pages.map((page) =>
         page.filter(item => item._id !== data._id)
       );
@@ -84,74 +56,16 @@ const InfinitePage = () => {
       const lastPagesIdx = updatedPages.length - 1
       updatedPages[lastPagesIdx].push(lastTransaction);
 
-
-      //=======================================================================
-
-      let pageIdx = null
-      let prevDataCache = lastTransaction;
-      const newCacheQuery = [];
-      
-      for (let i = 0; i < pages.length; i += 1) {
-        const page = pages[i];
-        const removeTransaction = page.find(item => item._id === data._id);
-        
-        if (removeTransaction) {
-          pageIdx = i;
-        };  
-      };
-
-      for (let i = lastPageNumber - 1; i >= 0; i -= 1) {
-        const page = pages[i];
-    
-        if (i > pageIdx) {
-          const newCache = page.concat(prevDataCache);
-
-          prevDataCache = newCache.shift();
-          newCacheQuery.push(newCache);
-        };
-
-        if (i === pageIdx) {
-          const newCache = page
-            .filter(item => item._id !== data._id)
-            .concat(prevDataCache);
-
-          newCacheQuery.push(newCache);
-        }; 
-
-        if (i < pageIdx) {
-          newCacheQuery.push(page);
-        };
-
-      };
  
       queryClient.setQueryData(['transactionsList'], (prev) => {
-        return{
+        return {
           ...prev,
-          
-          pages: newCacheQuery.reverse(),
+          pages: updatedPages,
         }
       });
-
-      // const PAGE_LIMIT = 5;
-      // const lastPageNumber =  transactions.length / PAGE_LIMIT
-      
-      // setTransactions(prev => {
-      //   const newCache = prev
-      //   .filter(item => item._id !== data._id)
-      //   .concat(lastTransaction)
-        
-      //   return newCache;
-      // });
-
-      // setActivIdx(null);
     },
       
   });
-
- 
-  
-  
-   
 
   // const { mutate: createTrans } = useCreateTransactionInfinity(setTransactions);
 
@@ -159,25 +73,6 @@ const InfinitePage = () => {
     mutationFn: createTransaction,
 
     onSuccess: (data) => {
-      // const { pages } = queryClient.getQueryData(['transactionsList']);
-      // console.log("InfinitePage  pages:", pages);
-
-      
-      
-      // let newData = data;
-      // const newCacheQuery = [];
-
-      // for (let i = 0; i < pages.length; i += 1) {
-      //   const page = pages[i];
-
-      //   const newCache = [newData, ...page]
-      //     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
-
-      //   newData = newCache.pop();  
-
-      //   newCacheQuery.push(newCache);
-      // };
-
       let newData = data;
       
       queryClient.setQueryData(['transactionsList'], (prev) => {
@@ -193,7 +88,6 @@ const InfinitePage = () => {
         
         return {
           ...prev,
-          // pages: newCacheQuery,
           pages: updatedPages,
         }
         
@@ -232,9 +126,6 @@ const InfinitePage = () => {
       
     });
       
-      
-      
-
     // console.log("data:", data);
    
   const observerElem = useRef(null);  
@@ -262,7 +153,6 @@ const InfinitePage = () => {
   };
 
   const onDelete = (id) => {
-    
     timeID.current = setTimeout(() => {
     removeTransaction(id);
     console.log("DELETE");
@@ -280,8 +170,8 @@ const InfinitePage = () => {
   };
 
   const onOpen= (id) => {
-    // setActivIdx(id);
     setActivIdx(p => [...p, id]);
+    // setActivIdx(id);
   };
 
   const visibleMenu = (id) => {
@@ -320,25 +210,24 @@ const InfinitePage = () => {
 
       <div style={{ height: "145px", background: "aqua", overflowY: "scroll" }}>
        
-        {data?.map((item, idx) => {
+        {data?.map((item) => {
           return (
-          <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
-            <button type="button" onClick={() => onOpen(item._id)}>Open</button>
+            <div style={{display: 'flex', justifyContent: 'space-between', width: '400px'}} key={item._id}>
+              <button type="button" onClick={() => onOpen(item._id)}>Open</button>
 
-            <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
-              {item.category}
-            </li>
+              <li style={{ height: "30px", fontSize: "20px", width: "200px" }} >
+                {item.category}
+              </li>
 
-            { visibleMenu(item._id) && 
-              <ContexMenu 
-                activ={activIdx === item._id}
-                onClose={() => onClose(item._id)}
-                onDelete={() => onDelete(item._id)}
-                onCancelDeletion={() => onCancelDeletion()}
-              />
-            }
-
-          </div>
+              {visibleMenu(item._id) && (
+                <ContexMenu
+                  activ={activIdx === item._id}
+                  onClose={() => onClose(item._id)}
+                  onDelete={() => onDelete(item._id)}
+                  onCancelDeletion={() => onCancelDeletion()}
+                />
+              )}
+            </div>
           );
         })}
 
@@ -347,24 +236,152 @@ const InfinitePage = () => {
         </div> 
       </div>
 
-      {/* {data?.pages.map((group) => {
-        return group.response.map((pokemon) => {
-          return <li key={pokemon.name}>{pokemon.name}</li>;
-        });
-      })} */}
-
-      {/* <button
-        onClick={() => fetchNextPage()}
-        disabled={!hasNextPage || isFetchingNextPage}
-      >
-        {isFetchingNextPage
-          ? "Loading more..."
-          : hasNextPage
-          ? "Load More"
-          : "Nothing more to load"}
-      </button> */}
+     
     </>
   );
 };
 
 export default InfinitePage;
+
+
+//================DELETE=============================
+// const { pages } = queryClient.getQueryData(['transactionsList']);
+// const lastPageNumber = pages.length;
+
+// const lastPageData = await getAllTransactions(lastPageNumber);
+// const lastTransaction = lastPageData.pop();
+
+// const updatedPages = pages.map((page) =>
+//   page.filter(item => item._id !== data._id)
+// );
+
+// const lastPagesIdx = updatedPages.length - 1
+// updatedPages[lastPagesIdx].push(lastTransaction);
+
+// let pageIdx = null
+// let prevDataCache = lastTransaction;
+// const newCacheQuery = [];
+
+// for (let i = 0; i < pages.length; i += 1) {
+//   const page = pages[i];
+//   const removeTransaction = page.find(item => item._id === data._id);
+  
+//   if (removeTransaction) {
+//     pageIdx = i;
+//   };  
+// };
+
+// for (let i = lastPageNumber - 1; i >= 0; i -= 1) {
+//   const page = pages[i];
+
+//   if (i > pageIdx) {
+//     const newCache = page.concat(prevDataCache);
+
+//     prevDataCache = newCache.shift();
+//     newCacheQuery.push(newCache);
+//   };
+
+//   if (i === pageIdx) {
+//     const newCache = page
+//       .filter(item => item._id !== data._id)
+//       .concat(prevDataCache);
+
+//     newCacheQuery.push(newCache);
+//   }; 
+
+//   if (i < pageIdx) {
+//     newCacheQuery.push(page);
+//   };
+
+// };
+
+// queryClient.setQueryData(['transactionsList'], (prev) => {
+//   return{
+//     ...prev,
+    
+//     pages: newCacheQuery.reverse(),
+//   }
+// });
+
+//================DELETE=============================
+// const PAGE_LIMIT = 5;
+// const lastPageNumber =  transactions.length / PAGE_LIMIT
+
+// setTransactions(prev => {
+//   const newCache = prev
+//   .filter(item => item._id !== data._id)
+//   .concat(lastTransaction)
+  
+//   return newCache;
+// });
+
+//================DELETE=============================
+// const mutation = useMutation({
+//   mutationFn: createTransaction,
+
+//   onSuccess: (data) => {
+//     setTransactions(prev => {
+//       const newCache = prev
+//       .concat(data)
+//       .sort((a, b) => Date.parse(b.date) - Date.parse(a.date))
+//       .slice(0, -1);
+
+//       return newCache;
+//     });
+//   },
+    
+// });
+
+//=================CREATE================================
+
+// const { pages } = queryClient.getQueryData(['transactionsList']);
+// console.log("InfinitePage  pages:", pages);
+
+// let newData = data;
+// const newCacheQuery = [];
+
+// for (let i = 0; i < pages.length; i += 1) {
+//   const page = pages[i];
+
+//   const newCache = [newData, ...page]
+//     .sort((a, b) => Date.parse(b.date) - Date.parse(a.date));
+
+//   newData = newCache.pop();  
+
+//   newCacheQuery.push(newCache);
+// };
+
+// queryClient.setQueryData(['transactionsList'], (prev) => {
+//   return {
+//     ...prev,
+//     pages: newCacheQuery,
+//   }
+  
+// });
+
+//==========================POKEMONS=============================
+
+// const { data, isLoading, fetchNextPage, hasNextPage, isFetchingNextPage } =
+//   useInfiniteQuery({
+//     queryKey: ["pokemonList"],
+//     queryFn: ({ pageParam }) => getPokemonsList(pageParam),
+//     getNextPageParam: (lastPage) => lastPage.nextPage,
+//   });
+
+
+// {data?.pages.map((group) => {
+//   return group.response.map((pokemon) => {
+//     return <li key={pokemon.name}>{pokemon.name}</li>;
+//   });
+// })}
+
+// <button
+//   onClick={() => fetchNextPage()}
+//   disabled={!hasNextPage || isFetchingNextPage}
+// >
+//   {isFetchingNextPage
+//     ? "Loading more..."
+//     : hasNextPage
+//     ? "Load More"
+//     : "Nothing more to load"}
+// </button>
