@@ -23,9 +23,10 @@ export default function Home() {
             <code className={styles.code}>pages/index.js</code>
           </p>
           <div>
-            <Link href="/transactions/1">Transactions</Link>
+            <Link href="/transactions">Transactions</Link>
             <Link href="/transactions/second">SECOND</Link>
             <Link href="/transactions/infinite">INFINITY</Link>
+            <Link href="/transactions/server?pageNum=1">SERVER PROPS</Link>
           </div>
         </div>
 
