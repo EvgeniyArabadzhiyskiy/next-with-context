@@ -2,7 +2,7 @@ import axios from "axios";
 import Link from "next/link";
 import { useRef, useCallback, useEffect, useContext, useState } from "react";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
-import { useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { dehydrate, QueryClient, useInfiniteQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { HomeContext } from "@/components/Context";
 import { createTransaction } from "@/helpers/createTransaction";
 import { useCreateTransactionInfinity } from "@/hooks/useCreateTransactionInfinity";
@@ -27,7 +27,50 @@ const transData = {
   // date: new Date().toString(),
 };
 
-const InfinitePage = () => {
+
+
+export async function getServerSideProps() {
+  const queryClient = new QueryClient();
+
+  const firstPageData = await getAllTransactions(1)
+
+  await queryClient.prefetchInfiniteQuery({
+    queryKey: ["transactionsList"],
+    queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
+    
+    initialData: {
+      pages: [{ data: firstPageData }],
+      pageParams: [1],
+    }
+  });
+
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+    },
+  };
+}
+
+// export async function getServerSideProps() {
+//   const queryClient = new QueryClient();
+
+//   await queryClient.prefetchInfiniteQuery({
+//     queryKey: ["transactionsList"],
+//     queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
+//   });
+
+//   return {
+//     props: {
+//       dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+//     },
+//   };
+// }
+
+
+
+const InfinitePage = ({dehydratedState}) => {
+  // console.log("HomePage  dehydratedState:", dehydratedState.queries[0].state);
+  
   const timeID = useRef(null)
   const queryClient = useQueryClient();
 
@@ -111,10 +154,19 @@ const InfinitePage = () => {
         // staleTime: 100000,
         // cacheTime: 12000,
 
-      select: (data) =>  data.pages.flat(),
+      // select: (data) =>  data.pages.flat(),
+      
+      select: (data) => {
+        console.log("data:", data);
+        if (Array.isArray(data)) {
+          return data;
+        } else {
+          return data.pages.flat();
+        }
+      },
 
       onSuccess: (data) => {
-        
+        // console.log("data:", data);
         // const currentIdx = data.pages.length - 1
         // const currentPage = data.pages[currentIdx]
         
