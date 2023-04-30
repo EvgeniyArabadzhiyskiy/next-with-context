@@ -24,7 +24,8 @@ export default function Home() {
             <Link href="/transactions/infinite">INFINITY</Link>
             <Link href="/transactions/1">STATIC PROPS</Link>
             <Link href="/transactions/new/1">SERVER DINAMIC</Link>
-            <Link href="/transactions/server">SERVER PROPS</Link>
+            <Link href="/transactions/server">STATIC ONE PAGE</Link>
+            <Link href="/transactions/first-server">FIRST SERVER</Link>
           </div>
         </div>
       </main>
