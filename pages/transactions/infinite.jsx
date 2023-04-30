@@ -29,6 +29,23 @@ const transData = {
 
 
 
+
+
+// export async function getServerSideProps() {
+//   const queryClient = new QueryClient();
+
+//   await queryClient.prefetchInfiniteQuery({
+//     queryKey: ["transactionsList"],
+//     queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
+//   });
+
+//   return {
+//     props: {
+//       dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
+//     },
+//   };
+// }
+
 export async function getServerSideProps() {
   const queryClient = new QueryClient();
 
@@ -51,26 +68,33 @@ export async function getServerSideProps() {
   };
 }
 
-// export async function getServerSideProps() {
-//   const queryClient = new QueryClient();
 
-//   await queryClient.prefetchInfiniteQuery({
-//     queryKey: ["transactionsList"],
-//     queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
-//   });
 
-//   return {
-//     props: {
-//       dehydratedState: JSON.parse(JSON.stringify(dehydrate(queryClient))),
-//     },
-//   };
+// export default function TodoList() {
+//   const { data, fetchNextPage, hasNextPage,  } =
+//     useInfiniteQuery({
+//       queryKey: ["transactionsList"],
+//       queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
+//       getNextPageParam: (lastPage, allPages) => {
+//         const nextPage = allPages.length + 1;
+        
+//         return lastPage.length !== 0 ? nextPage : undefined;
+//       },
+
+//       staleTime: Infinity,
+  
+//     });
+//   return (
+//     <div>
+//       {data.map((todo) => (
+//         <TodoItem key={todo.id} todo={todo} />
+//       ))}
+//     </div>
+//   );
 // }
 
 
-
-const InfinitePage = ({dehydratedState}) => {
-  // console.log("HomePage  dehydratedState:", dehydratedState.queries[0].state);
-  
+const InfinitePage = () => {
   const timeID = useRef(null)
   const queryClient = useQueryClient();
 
@@ -154,17 +178,8 @@ const InfinitePage = ({dehydratedState}) => {
         // staleTime: 100000,
         // cacheTime: 12000,
 
-      // select: (data) =>  data.pages.flat(),
+      select: (data) =>  data.pages.flat(),
       
-      select: (data) => {
-        console.log("data:", data);
-        if (Array.isArray(data)) {
-          return data;
-        } else {
-          return data.pages.flat();
-        }
-      },
-
       onSuccess: (data) => {
         // console.log("data:", data);
         // const currentIdx = data.pages.length - 1
