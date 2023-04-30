@@ -57,7 +57,7 @@ export async function getServerSideProps() {
     
     initialData: {
       pages: [{ data: firstPageData }],
-      pageParams: [1],
+      pageParams: [0],
     }
   });
 
@@ -67,31 +67,6 @@ export async function getServerSideProps() {
     },
   };
 }
-
-
-
-// export default function TodoList() {
-//   const { data, fetchNextPage, hasNextPage,  } =
-//     useInfiniteQuery({
-//       queryKey: ["transactionsList"],
-//       queryFn: ({ pageParam = 1 }) => getAllTransactions(pageParam),
-//       getNextPageParam: (lastPage, allPages) => {
-//         const nextPage = allPages.length + 1;
-        
-//         return lastPage.length !== 0 ? nextPage : undefined;
-//       },
-
-//       staleTime: Infinity,
-  
-//     });
-//   return (
-//     <div>
-//       {data.map((todo) => (
-//         <TodoItem key={todo.id} todo={todo} />
-//       ))}
-//     </div>
-//   );
-// }
 
 
 const InfinitePage = () => {
@@ -194,6 +169,7 @@ const InfinitePage = () => {
     });
       
     // console.log("data:", data);
+    console.log("HomePage", queryClient.getQueriesData());
    
   const observerElem = useRef(null);  
  
