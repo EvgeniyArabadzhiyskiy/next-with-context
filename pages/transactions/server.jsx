@@ -202,20 +202,10 @@ import { useEffect, useState } from "react";
 // }
 
 
-//=========== getStaticPaths with getStaticProps ====================
+//=========== getStaticProps ====================
 
-// export async function getStaticPaths ()  {
-//   console.log("HELLO get Static Paths");
-//   const allPagesNum = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-//   return {
-//     paths: allPagesNum.map((p) => `/transactions/${p}`),
-//     fallback: false,
-//   }
-// }
-
-export async function getStaticProps(context) {
+export async function getStaticProps() {
   console.log("Static Props");
-  // const pageNum = context.params.pageNum;
   const todos = await getAllTransactions(1);
   
   return {
@@ -225,28 +215,11 @@ export async function getStaticProps(context) {
 
 
 export default function TodosPage({ todos }) {
-  // const router = useRouter();
-  // const pageNum = router.query.pageNum || 1;
-
-  // const handleNextClick = () => {
-  //   const currentPageNum = Number(pageNum);
-  //   const nextPageNum = currentPageNum + 1;
-  //   router.push(`/transactions/${nextPageNum}`);
-  // };
-
-  // const handlePrevClick = () => {
-  //   const currentPageNum = Number(pageNum);
-  //   const nextPageNum = currentPageNum - 1;
-  //   router.push(`/transactions/${nextPageNum}`);
-  // };
-
   return (
     <>
       <Link href="/">HOME</Link>
-      {/* <button type="button" onClick={handleNextClick}>Next Page</button>
-      <button type="button" disabled={pageNum <= 1} onClick={handlePrevClick}>Prev Page</button> */}
-
-      <h1>Static Props</h1>
+  
+      <h1>Static ONE Props</h1>
       <ul>
         {todos?.map((item) => {
           return (
