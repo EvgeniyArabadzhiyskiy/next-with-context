@@ -22,10 +22,13 @@ export default function Home() {
             <Link href="/transactions">Transactions</Link>
             <Link href="/transactions/second">SECOND</Link>
             <Link href="/transactions/infinite">INFINITY</Link>
-            <Link href="/transactions/1">STATIC PROPS</Link>
-            <Link href="/transactions/new/1">SERVER DINAMIC</Link>
-            <Link href="/transactions/server">STATIC ONE PAGE</Link>
+            
+            <Link href="/transactions/no-query/1">SERVER NO QUERY</Link>
+            <Link href="/transactions/new/1">SERVER WITH DEGYDRATE</Link>
             <Link href="/transactions/first-server">FIRST SERVER</Link>
+
+            <Link href="/transactions/1">STATIC PROPS</Link>
+            <Link href="/transactions/server">STATIC ONE PAGE</Link>
           </div>
         </div>
       </main>
