@@ -1,5 +1,5 @@
 import About from "@/components/About";
-import HomeProvider, { HomeContext } from "@/components/Context";
+import ContextProvider, { HomeContext } from "@/components/Context";
 import { fetchPokemon } from "@/helpers/fetchPokemon";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
 import Link from "next/link";
@@ -34,26 +34,26 @@ const transData = {
 
 
 
-// export async function getStaticProps() {
-//   const queryClient = new QueryClient();
+export async function getStaticProps() {
+  const queryClient = new QueryClient();
 
-//   // const data = await queryClient.fetchQuery(["transactions", 1], () => getAllTransactions(1));
+  // const data = await queryClient.fetchQuery(["transactions", 1], () => getAllTransactions(1));
   
-//    await queryClient.prefetchQuery(["transactions", 1], () => getAllTransactions(1));
+   await queryClient.prefetchQuery(["transactions", 1], () => getAllTransactions(1));
 
-//   return {
-//     props: {
-//       dehydratedState: dehydrate(queryClient),
-//       // initialData: data
+  return {
+    props: {
+      dehydratedState: dehydrate(queryClient),
+      // initialData: data
 
-//     },
-//   };
-// }
-
-export async function getServerSideProps() {
-  const initialData = await getAllTransactions();
-  return { props: { initialData } };
+    },
+  };
 }
+
+// export async function getServerSideProps() {
+//   const initialData = await getAllTransactions(1);
+//   return { props: { initialData } };
+// }
 
 const HomePage = ({dehydratedState, initialData = [] }) => {
   // console.log("HomePage  initialData:", initialData);
@@ -216,7 +216,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   const { isLoading, data: todos, isPreviousData } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
-    initialData,
+    // initialData,
     // enabled: isSkip,
     // refetchOnWindowFocus: false,
 
@@ -308,9 +308,9 @@ export default HomePage;
 
 //============================================================
 // const WrapperContext = () => (
-//   <HomeProvider>
+//   <ContextProvider>
 //     <HomePage />
-//   </HomeProvider>
+//   </ContextProvider>
 // );
 
 // export default WrapperContext;
