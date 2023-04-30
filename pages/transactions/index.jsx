@@ -69,7 +69,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
-  console.log("pageNum:", pageNum);
+  
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
 
@@ -265,7 +265,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   return (
     <>
       <h1>Home Page</h1>
-      <Link href="/">HOME</Link> <Link href="/transactions/infinite">SECOND</Link>
+      <Link href="/">HOME</Link> <Link href="/transactions/infinite">INFINITY</Link>
       {/* {isShow && <About />}
       <button type="button" onClick={toggleVisible}>
         {isShow ? "Скрыть" : "Показать"}
