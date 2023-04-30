@@ -28,13 +28,14 @@ const transData = {
   typeOperation: "expense",
   comment: "Fruits",
   // date: "Wed Apr 05 2023 21:43:29 GMT+0300 (Восточная Европа, летнее время)",
+  // Wed Apr 05 2023 21:43:44 GMT+0300 //==15==
   date: "Wed Apr 05 2023 21:41:36 GMT+0300 (Восточная Европа, летнее время)",
   // date: new Date().toString(),
 };
 
 
 
-export async function getStaticProps() {
+export async function getServerSideProps() {
   const queryClient = new QueryClient();
 
   // const data = await queryClient.fetchQuery(["transactions", 1], () => getAllTransactions(1));
@@ -68,6 +69,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   // const [transactions, setTransactions] = useState([]);
   // const [isShow, setIsShow] = useState(false);
   const { transactions, setTransactions, pageNum, setPageNum } = useContext(HomeContext);
+  console.log("pageNum:", pageNum);
 
   // const dataCacheTrans = queryClient.getQueryData(["transactions", pageNum])  //ЕСЛИ данные не собираются в один массив
 
@@ -78,7 +80,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
   //   .flat()
 
   // console.log("dataCacheTrans:", dataCacheTrans);
-  // console.log("HomePage", queryClient.getQueriesData());
+  console.log("HomePage", queryClient.getQueriesData());
 
  
 
@@ -224,7 +226,7 @@ const HomePage = ({dehydratedState, initialData = [] }) => {
     keepPreviousData: true,
 
     onSuccess: (data) => {
-      console.log("data:", data);
+      // console.log("data:", data);
       // setTransactions((prev) => [...prev, ...data]);
       // setTransactions(data);
     },
