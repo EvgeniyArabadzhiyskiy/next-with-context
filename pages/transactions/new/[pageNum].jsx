@@ -3,12 +3,24 @@ import { dehydrate, QueryClient, useQuery, useQueryClient } from "@tanstack/reac
 import Link from "next/link";
 import { useRouter } from "next/router";
 
+// export async function getServerSideProps(context) {
+//   const pageNum = Number(context.params.pageNum);
+//   const todos = await getAllTransactions(pageNum);
+    
+//   return {
+//     props: { todos },
+//   };
+// }
+
 export async function getServerSideProps(context) {
   const pageNum = Number(context.params.pageNum);
-  const todos = await getAllTransactions(pageNum);
-    
+  const queryClient = new QueryClient();
+  await queryClient.prefetchQuery(["transactions", pageNum], () =>
+    getAllTransactions(pageNum)
+  );
+
   return {
-    props: { todos },
+    props: { dehydratedState: dehydrate(queryClient) },
   };
 }
   
@@ -20,7 +32,7 @@ export default function TodosPage({ todos }) {
   const { data } = useQuery({
     queryKey: ["transactions", pageNum],
     queryFn: () => getAllTransactions(pageNum),
-    initialData: todos,
+    // initialData: todos,
   
     keepPreviousData: true,
     staleTime: Infinity,
@@ -44,7 +56,8 @@ export default function TodosPage({ todos }) {
       <Link href="/">HOME</Link>
       <button type="button" onClick={handleNextClick}>Next Page</button>
       <button type="button" disabled={pageNum <= 1} onClick={handlePrevClick}>Prev Page</button>
-
+      
+      <h1>Server with Degydrate</h1>
       <ul>
         {data?.map((item) => {
           return (
