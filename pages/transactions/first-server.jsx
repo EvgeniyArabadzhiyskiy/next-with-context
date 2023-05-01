@@ -23,6 +23,7 @@ export async function getServerSideProps(context) {
 }
 
 export default function TodosPage() {
+  const queryClient = useQueryClient();
   const [pageNum, setPageNum] = useState(1);
 
   const { data } = useQuery({
@@ -32,6 +33,9 @@ export default function TodosPage() {
     keepPreviousData: true,
     staleTime: Infinity,
   });
+
+  const queryLength = queryClient.getQueriesData(["transactions"]);
+  console.log("TodosPage  queryLength:", queryLength);
 
   const handleNextClick = () => {
     setPageNum((p) => p + 1);
