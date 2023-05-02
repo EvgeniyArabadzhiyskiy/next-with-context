@@ -33,9 +33,10 @@ export default function TodosPage() {
     keepPreviousData: true,
     staleTime: Infinity,
   });
+  console.log("TodosPage  data:", data);
 
-  const queryLength = queryClient.getQueriesData(["transactions"]);
-  console.log("TodosPage  queryLength:", queryLength);
+  // const queryLength = queryClient.getQueriesData(["transactions"]);
+  // console.log("TodosPage  queryLength:", queryLength);
 
   const handleNextClick = () => {
     setPageNum((p) => p + 1);
