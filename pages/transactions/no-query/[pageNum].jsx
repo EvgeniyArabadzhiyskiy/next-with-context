@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useRouter } from "next/router";
 import { getAllTransactions } from "@/helpers/getAllTransactions";
-import { QueryClient } from "@tanstack/react-query";
 
 export async function getServerSideProps(context) {
   const pageNum = Number(context.params.pageNum);
@@ -13,10 +12,6 @@ export async function getServerSideProps(context) {
 }
 
 export default function TodosPage({ todos }) {
-  const queryClient = new QueryClient();
-  const queryLength = queryClient.getQueriesData(["transactions"]);
-  console.log("TodosPage  queryLength:", queryLength);
-  
   const router = useRouter();
   const pageNum = Number(router.query.pageNum) || 1;
 
